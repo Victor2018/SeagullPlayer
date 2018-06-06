@@ -48,7 +48,7 @@ public class YoutubeParser {
             for (String fmt : fmtArray) {
                 String[] format = fmt.split("/");
             }
-            data.keywords = videoInfoMap.get("keywords").split(",");
+//            data.keywords = videoInfoMap.get("keywords").split(",");
             data.bigthumb = videoInfoMap.get("iurlsd");
             data.bigthumbhd = videoInfoMap.get("iurlsdmaxres");
             // ciphertag//TODO:这货标识是否使用密码签名 'use_cipher_signature': ['True']
