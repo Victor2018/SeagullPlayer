@@ -339,6 +339,10 @@ public class Player implements TextureView.SurfaceTextureListener,
         return mMediaPlayer;
     }
 
+    public boolean isPlaying () {
+        return mMediaPlayer == null ? false : true;
+    }
+
     public void playUrl(String videoUrl,boolean isLive) {
         Log.e(TAG, "playUrl()......" + videoUrl);
         mPlayUrl = videoUrl;
@@ -422,6 +426,10 @@ public class Player implements TextureView.SurfaceTextureListener,
                 mMediaPlayer.release();
             }
             mMediaPlayer = null;
+        }
+        if (mSurfaceTexture != null) {
+            mSurfaceTexture.release();
+            mSurfaceTexture = null;
         }
     }
 

@@ -1,12 +1,10 @@
 package com.victor.player.library.module;
 
-import android.content.Context;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.SurfaceView;
 
-import com.victor.http.presenter.HttpPresenter;
 import com.victor.player.library.data.FmtStreamMap;
 import com.victor.player.library.data.VimeoVideo;
 import com.victor.player.library.data.YoutubeReq;

@@ -1,6 +1,10 @@
 package com.victor.player.library.util;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.net.Uri;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 
 import java.util.regex.Matcher;
@@ -68,4 +72,5 @@ public class PlayUtil {
         Matcher matcher = pattern.matcher((CharSequence) strNum);
         return matcher.matches();
     }
+
 }
