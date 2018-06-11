@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.SurfaceView;
+import android.view.TextureView;
 
 import com.victor.player.library.data.FmtStreamMap;
 import com.victor.player.library.data.VimeoVideo;
@@ -19,6 +20,7 @@ import com.victor.player.library.view.YoutubeView;
 public class PlayHelper implements YoutubeView<String>,VimeoView<String>{
     private String TAG = "PlayHelper";
     private SurfaceView mSurfaceView;
+    private TextureView mTextureView;
     private Player mPlayer;
     private Handler mHandler;
     private YoutubePresenterImpl youtubePresenter;
@@ -28,6 +30,11 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>{
 
     public PlayHelper(SurfaceView surfaceView, Handler handler) {
         mSurfaceView = surfaceView;
+        mHandler = handler;
+        init();
+    }
+    public PlayHelper(TextureView surfaceView, Handler handler) {
+        mTextureView = surfaceView;
         mHandler = handler;
         init();
     }
