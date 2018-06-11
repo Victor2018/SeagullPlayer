@@ -42,7 +42,7 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>{
     private void init () {
         youtubePresenter = new YoutubePresenterImpl(this);
         vimeoPresenter = new VimeoPresenterImpl(this);
-        mPlayer = new Player(mSurfaceView,mHandler);
+        mPlayer = mTextureView != null ? new Player(mTextureView,mHandler) : new Player(mSurfaceView,mHandler);
     }
 
     public void play(String url) {
