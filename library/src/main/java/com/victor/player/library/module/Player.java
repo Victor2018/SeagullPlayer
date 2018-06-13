@@ -71,12 +71,14 @@ public class Player implements TextureView.SurfaceTextureListener,
         this(handler);
         mTextureView = textureView;
         mTextureView.setSurfaceTextureListener(this);
+        createMediaPlayer();
     }
     public Player(SurfaceView surfaceView, Handler handler) {
         this(handler);
         if (surfaceView != null) {
             open(surfaceView);
         }
+        createMediaPlayer();
     }
 
     public void open(SurfaceView surfaceView) {
@@ -194,19 +196,22 @@ public class Player implements TextureView.SurfaceTextureListener,
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         mSurfaceHolder = holder;
-        createMediaPlayer();
+//        createMediaPlayer();// 如果surfaceview被添加到其他view中会导致正在播放的影片重新播放
 
         // //////////////////
         // because maybe surface view is not ready when first play,
         // but application already call playUrl,
         // then we need to play again.
         // /////////////////
-        openVideo();
+//        openVideo();
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         mSurfaceHolder = holder;
+        if (mMediaPlayer != null) {
+            mMediaPlayer.setDisplay(mSurfaceHolder);
+        }
     }
 
     @Override

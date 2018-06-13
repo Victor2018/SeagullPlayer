@@ -33,8 +33,8 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>{
         mHandler = handler;
         init();
     }
-    public PlayHelper(TextureView surfaceView, Handler handler) {
-        mTextureView = surfaceView;
+    public PlayHelper(TextureView textureView, Handler handler) {
+        mTextureView = textureView;
         mHandler = handler;
         init();
     }
@@ -87,6 +87,13 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>{
         if (TextUtils.isEmpty(data)) {
             Log.e(TAG,"youtube response data == null");
             if (mHandler != null) {
+                mHandler.sendEmptyMessage(Player.PLAYER_ERROR);
+            }
+            return;
+        }
+        if (mPlayer == null) {
+            if (mHandler != null) {
+                Log.e(TAG,"mPlayer == null");
                 mHandler.sendEmptyMessage(Player.PLAYER_ERROR);
             }
             return;
@@ -146,29 +153,34 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>{
             }
             return;
         }
-        if (mPlayer != null) {
-            String quality = "1080p";
-            String playUrl = vimeoVideo.getStreams().get("1080p");
-            if (TextUtils.isEmpty(playUrl)) {
-                playUrl = vimeoVideo.getStreams().get("720p");
-                quality = "720p";
+        if (mPlayer == null) {
+            if (mHandler != null) {
+                Log.e(TAG,"mPlayer == null");
+                mHandler.sendEmptyMessage(Player.PLAYER_ERROR);
             }
-            if (TextUtils.isEmpty(playUrl)) {
-                playUrl = vimeoVideo.getStreams().get("540p");
-                quality = "540p";
-            }
-            if (TextUtils.isEmpty(playUrl)) {
-                playUrl = vimeoVideo.getStreams().get("360p");
-                quality = "360p";
-            }
-            if (TextUtils.isEmpty(playUrl)) {
-                playUrl = vimeoVideo.getStreams().get("270p");
-                quality = "270p";
-            }
-            Log.e(TAG, "OnVimeo-vimeoVideo.getStreams()------>" + vimeoVideo.getStreams().toString());
-            Log.e(TAG, "OnVimeo-quality------>" + quality);
-            Log.e(TAG, "OnVimeo-playUrl------>" + playUrl);
-            mPlayer.playUrl(playUrl, false);
+            return;
         }
+        String quality = "1080p";
+        String playUrl = vimeoVideo.getStreams().get("1080p");
+        if (TextUtils.isEmpty(playUrl)) {
+            playUrl = vimeoVideo.getStreams().get("720p");
+            quality = "720p";
+        }
+        if (TextUtils.isEmpty(playUrl)) {
+            playUrl = vimeoVideo.getStreams().get("540p");
+            quality = "540p";
+        }
+        if (TextUtils.isEmpty(playUrl)) {
+            playUrl = vimeoVideo.getStreams().get("360p");
+            quality = "360p";
+        }
+        if (TextUtils.isEmpty(playUrl)) {
+            playUrl = vimeoVideo.getStreams().get("270p");
+            quality = "270p";
+        }
+        Log.e(TAG, "OnVimeo-vimeoVideo.getStreams()------>" + vimeoVideo.getStreams().toString());
+        Log.e(TAG, "OnVimeo-quality------>" + quality);
+        Log.e(TAG, "OnVimeo-playUrl------>" + playUrl);
+        mPlayer.playUrl(playUrl, false);
     }
 }
