@@ -345,7 +345,7 @@ public class Player implements TextureView.SurfaceTextureListener,
     }
 
     public boolean isPlaying () {
-        return mMediaPlayer == null ? false : true;
+        return mMediaPlayer == null ? false : mMediaPlayer.isPlaying();
     }
 
     public void playUrl(String videoUrl,boolean isLive) {

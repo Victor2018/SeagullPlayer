@@ -1,101 +1,83 @@
 package com.victor.player;
 
-import android.os.Handler;
-import android.os.Message;
-import android.support.v7.app.AppCompatActivity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.SurfaceView;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.Toast;
+import android.view.WindowManager;
+import android.widget.Button;
 
-import com.victor.player.library.module.Player;
-import com.victor.player.library.module.PlayHelper;
+import com.victor.player.library.util.Constant;
 
-public class MainActivity extends AppCompatActivity {
-    private String TAG = "MainActivity";
-    private static final String YOUTUBE_ID = "SMcXGeltEQQ";
-    private static final String YOUTUBE_URL = "https://www.youtube.com/watch?v=vqcxM7dSJtw";
+public class MainActivity extends AppCompatActivity implements View.OnClickListener{
+    private String TAG = "PlayActivity";
+    private static final String YOUTUBE_ID = "lzbJ8E-WjFI";
+    private static final String YOUTUBE_URL = "https://www.youtube.com/watch?v=SMcXGeltEQQ";
     private static final String VIMEO_ID   = "204150149";
-    private static final String VIMEO_URL = "https://vimeo.com/channels/staffpicks/262705319";
-    private static final String M3U8_URL = "http://ivi.bupt.edu.cn/hls/cctv3.m3u8";
-    private SurfaceView mSvPlay;
-    private ProgressBar mPbLoading;
-    private PlayHelper mPlayHelper;
+    private static final String VIMEO_URL   = "https://vimeo.com/channels/staffpicks/262705319";
+//	    private static final String VIMEO_URL   = "https://vimeo.com/269827127";
 
-    Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case Player.PLAYER_PREPARING:
-                    mPbLoading.setVisibility(View.VISIBLE);
-                    break;
-                case Player.PLAYER_BUFFERING_START:
-                    mPbLoading.setVisibility(View.VISIBLE);
-                    break;
-                case Player.PLAYER_BUFFERING_END:
-                    mPbLoading.setVisibility(View.GONE);
-                    break;
-                case Player.PLAYER_PREPARED:
-                    mPbLoading.setVisibility(View.GONE);
-                    break;
-                case Player.PLAYER_PROGRESS_INFO:
-                    break;
-                case Player.PLAYER_COMPLETE:
-                    mPlayHelper.play(VIMEO_URL);
-                    break;
-                case Player.PLAYER_SEEK_END:
-                    break;
-                case Player.PLAYER_PLAYING:
-                    break;
-                case Player.PLAYER_PAUSE:
-                    break;
-                case Player.PLAYER_ERROR:
-                    mPbLoading.setVisibility(View.GONE);
-                    Toast.makeText(getApplicationContext(), "播放失败！", Toast.LENGTH_SHORT).show();
-                    Log.e(TAG,"Player.PLAYER_ERROR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    break;
-            }
-        }
-    };
+    /**
+     * SDMC 播放地址为鉴权后的真实播放地址，播放器不做鉴权业务处理
+     */
+    private static final String M3U8_URL   = "http://ivi.bupt.edu.cn/hls/cctv3.m3u8";
+    private static final String FACEBOOK_URL   = "https://www.facebook.com/misswymma2/videos/599083000439930/";
+
+    private Button mBtnPlayYoutubeId,mBtnPlayYoutubeUrl,mBtnPlayVimeoId,mBtnPlayVimeoUrl,mBtnPlayM3u8,mBtnPlayFacebook;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);//去掉信息栏
         setContentView(R.layout.activity_main);
-        initialze();
+        initialize();
     }
 
-    private void initialze () {
-        mSvPlay = findViewById(R.id.sv_play);
-        mPbLoading = findViewById(R.id.pb_loading);
-        mPlayHelper = new PlayHelper(mSvPlay,mHandler);
-        mPlayHelper.play(YOUTUBE_ID);
-    }
+    private void initialize () {
+        mBtnPlayYoutubeId = (Button) findViewById(R.id.btn_play_youtube_id);
+        mBtnPlayYoutubeUrl = (Button) findViewById(R.id.btn_play_youtube_url);
+        mBtnPlayVimeoId = (Button) findViewById(R.id.btn_play_vimeo_id);
+        mBtnPlayVimeoUrl = (Button) findViewById(R.id.btn_play_vimeo_url);
+        mBtnPlayM3u8 = (Button) findViewById(R.id.btn_play_m3u8);
+        mBtnPlayFacebook = (Button) findViewById(R.id.btn_play_facebook);
+        mBtnPlayYoutubeId.setOnClickListener(this);
+        mBtnPlayYoutubeUrl.setOnClickListener(this);
+        mBtnPlayVimeoId.setOnClickListener(this);
+        mBtnPlayVimeoUrl.setOnClickListener(this);
+        mBtnPlayM3u8.setOnClickListener(this);
+        mBtnPlayFacebook.setOnClickListener(this);
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (mPlayHelper != null && mPlayHelper.getPlayer() != null) {
-            mPlayHelper.getPlayer().pause();
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (mPlayHelper != null && mPlayHelper.getPlayer() != null) {
-            mPlayHelper.getPlayer().resume();
-        }
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (mPlayHelper != null) {
-            mPlayHelper.onDestroy();
-            mPlayHelper = null;
+    public void onClick(View v) {
+        Intent intent = new Intent(MainActivity.this, PlayActivity.class);
+        switch (v.getId()) {
+            case R.id.btn_play_youtube_id:
+                intent.putExtra(Constant.PLAY_URL,YOUTUBE_ID);
+                startActivity(intent);
+                break;
+            case R.id.btn_play_youtube_url:
+                intent.putExtra(Constant.PLAY_URL,YOUTUBE_URL);
+                startActivity(intent);
+                break;
+            case R.id.btn_play_vimeo_id:
+                intent.putExtra(Constant.PLAY_URL,VIMEO_ID);
+                startActivity(intent);
+                break;
+            case R.id.btn_play_vimeo_url:
+                intent.putExtra(Constant.PLAY_URL,VIMEO_URL);
+                startActivity(intent);
+                break;
+            case R.id.btn_play_m3u8:
+                intent.putExtra(Constant.PLAY_URL,M3U8_URL);
+                startActivity(intent);
+                break;
+            case R.id.btn_play_facebook:
+                intent.putExtra(Constant.PLAY_URL,FACEBOOK_URL);
+                startActivity(intent);
+                break;
         }
     }
+
 }

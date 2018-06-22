@@ -55,6 +55,8 @@ public class PlayUtil {
                     videoType = Constant.VideoType.YOUTUBE;
                 } else if (host.equals(Constant.VIMEO_HOST)) {
                     videoType = Constant.VideoType.VIMEO;
+                } else if (host.equals(Constant.FACEBOOK_HOST)) {
+                    videoType = Constant.VideoType.FACEBOOK;
                 } else {
                     videoType = Constant.VideoType.SDMC;
                 }

@@ -9,6 +9,7 @@ import android.view.TextureView;
 import com.victor.player.library.data.FmtStreamMap;
 import com.victor.player.library.data.VimeoVideo;
 import com.victor.player.library.data.YoutubeReq;
+import com.victor.player.library.interfaces.OnHttpListener;
 import com.victor.player.library.presenter.VimeoPresenterImpl;
 import com.victor.player.library.presenter.YoutubePresenterImpl;
 import com.victor.player.library.util.Constant;
@@ -17,7 +18,7 @@ import com.victor.player.library.util.YoutubeParser;
 import com.victor.player.library.view.VimeoView;
 import com.victor.player.library.view.YoutubeView;
 
-public class PlayHelper implements YoutubeView<String>,VimeoView<String>{
+public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpListener<String> {
     private String TAG = "PlayHelper";
     private SurfaceView mSurfaceView;
     private TextureView mTextureView;
@@ -27,6 +28,7 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>{
     private VimeoPresenterImpl vimeoPresenter;
     private YoutubeReq youtubeReq;
     private int videoType;
+    private HttpRequestHelper mHttpRequestHelper;
 
     public PlayHelper(SurfaceView surfaceView, Handler handler) {
         mSurfaceView = surfaceView;
@@ -42,6 +44,7 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>{
     private void init () {
         youtubePresenter = new YoutubePresenterImpl(this);
         vimeoPresenter = new VimeoPresenterImpl(this);
+        mHttpRequestHelper = new HttpRequestHelper( this);
         mPlayer = mTextureView != null ? new Player(mTextureView,mHandler) : new Player(mSurfaceView,mHandler);
     }
 
@@ -51,11 +54,15 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>{
         switch (videoType) {
             case Constant.VideoType.YOUTUBE:
                 Log.e(TAG,"playing youtube......");
-                youtubePresenter.sendRequest(String.format(Constant.VIDINFO, identifier),null,null);
+                youtubePresenter.sendRequest(String.format(Constant.YOUTUBE_URL, identifier),null,null);
                 break;
             case Constant.VideoType.VIMEO:
                 Log.e(TAG,"playing vimeo......");
                 vimeoPresenter.sendRequest(String.format(Constant.VIMEO_CONFIG_URL, identifier),Constant.getVimeoHttpHeaderParm(identifier),null);
+                break;
+            case Constant.VideoType.FACEBOOK:
+                Log.e(TAG,"playing vimeo......");
+                mHttpRequestHelper.sendRequestWithParms(Constant.Msg.REQUEST_FACEBOOK_PLAY_URL, identifier);
                 break;
             default:
                 Log.e(TAG,"playing m3u8......");
@@ -182,5 +189,56 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>{
         Log.e(TAG, "OnVimeo-quality------>" + quality);
         Log.e(TAG, "OnVimeo-playUrl------>" + playUrl);
         mPlayer.playUrl(playUrl, false);
+    }
+
+    @Override
+    public void onComplete(int videoType, String data, String msg) {
+        if (TextUtils.isEmpty(data)) {
+            Log.e(TAG,"response data == null");
+            if (mHandler != null) {
+                mHandler.sendEmptyMessage(Player.PLAYER_ERROR);
+            }
+            return;
+        }
+        switch (videoType) {
+            case Constant.VideoType.VIMEO:
+                break;
+            case Constant.VideoType.YOUTUBE:
+                break;
+            case Constant.VideoType.FACEBOOK:
+                playFacebook(data);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private synchronized void playFacebook (String data) {
+        Log.e(TAG, "playFacebook-data = " + data);
+        if (TextUtils.isEmpty(data)) {
+            Log.e(TAG,"facebook response data == null");
+            if (mHandler != null) {
+                mHandler.sendEmptyMessage(Player.PLAYER_ERROR);
+            }
+            return;
+        }
+        if (!data.contains(",")) {
+            Log.e(TAG,"facebook response data error!");
+            if (mHandler != null) {
+                mHandler.sendEmptyMessage(Player.PLAYER_ERROR);
+            }
+        }
+        String playUrl = data.split(",")[0];
+        if (TextUtils.isEmpty(playUrl)) {
+            playUrl = data.split(",")[1];
+        }
+        if (TextUtils.isEmpty(playUrl)) {
+            Log.e(TAG,"facebook response playUrl is empty!");
+            if (mHandler != null) {
+                mHandler.sendEmptyMessage(Player.PLAYER_ERROR);
+            }
+            return;
+        }
+        mPlayer.playUrl(playUrl,false);
     }
 }

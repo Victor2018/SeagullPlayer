@@ -1,20 +1,45 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:orientation="vertical" >
 
-    <SurfaceView
-        android:id="@+id/sv_play"
+    <Button
+        android:id="@+id/btn_play_youtube_id"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <ProgressBar
-        android:id="@+id/pb_loading"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"/>
+        android:textAllCaps="false"
+        android:text="play youtube video"/>
+    <Button
+        android:id="@+id/btn_play_youtube_url"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAllCaps="false"
+        android:text="play youtube url"/>
 
-</FrameLayout>
+    <Button
+        android:id="@+id/btn_play_vimeo_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAllCaps="false"
+        android:text="play vimeo id"/>
+    <Button
+        android:id="@+id/btn_play_vimeo_url"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAllCaps="false"
+        android:text="play vimeo url"/>
+    <Button
+        android:id="@+id/btn_play_m3u8"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAllCaps="false"
+        android:text="play m3u8"/>
+    <Button
+        android:id="@+id/btn_play_facebook"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAllCaps="false"
+        android:text="play facebook"/>
+
+</LinearLayout>
