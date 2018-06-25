@@ -48,7 +48,7 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
         mPlayer = mTextureView != null ? new Player(mTextureView,mHandler) : new Player(mSurfaceView,mHandler);
     }
 
-    public void play(String url) {
+    public synchronized void play(String url) {
         videoType = PlayUtil.getVideoType(url);
         String identifier = PlayUtil.getVideoId(url);
         switch (videoType) {
@@ -61,7 +61,7 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
                 vimeoPresenter.sendRequest(String.format(Constant.VIMEO_CONFIG_URL, identifier),Constant.getVimeoHttpHeaderParm(identifier),null);
                 break;
             case Constant.VideoType.FACEBOOK:
-                Log.e(TAG,"playing vimeo......");
+                Log.e(TAG,"playing facebook......");
                 mHttpRequestHelper.sendRequestWithParms(Constant.Msg.REQUEST_FACEBOOK_PLAY_URL, identifier);
                 break;
             default:
@@ -193,6 +193,7 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
 
     @Override
     public void onComplete(int videoType, String data, String msg) {
+        Log.e(TAG,"onComplete()......msg = " + msg);
         if (TextUtils.isEmpty(data)) {
             Log.e(TAG,"response data == null");
             if (mHandler != null) {
@@ -222,15 +223,19 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
             }
             return;
         }
-        if (!data.contains(",")) {
+        if (!data.contains(",") || data.length() == 1) {
             Log.e(TAG,"facebook response data error!");
             if (mHandler != null) {
                 mHandler.sendEmptyMessage(Player.PLAYER_ERROR);
             }
         }
-        String playUrl = data.split(",")[0];
-        if (TextUtils.isEmpty(playUrl)) {
-            playUrl = data.split(",")[1];
+        String[] urls = data.split(",");
+        String playUrl = "";
+        if (urls.length > 1) {
+            playUrl = urls[0];
+        }
+        if (TextUtils.isEmpty(playUrl) && urls.length >= 2) {
+            playUrl = urls[1];
         }
         if (TextUtils.isEmpty(playUrl)) {
             Log.e(TAG,"facebook response playUrl is empty!");

@@ -42,7 +42,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
     implementation 'com.github.Victor2018:HttpLib:v2.7'
-    implementation files('libs/jsoup-1.9.2.jar')
+    implementation files('libs/jsoup-1.11.3.jar')
 }
 
 def SDK_BASENAME = "LongPlayer";
