@@ -91,13 +91,6 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
 
     @Override
     public void OnYoutube(String data, String msg) {
-        if (TextUtils.isEmpty(data)) {
-            Log.e(TAG,"youtube response data == null");
-            if (mHandler != null) {
-                mHandler.sendEmptyMessage(Player.PLAYER_ERROR);
-            }
-            return;
-        }
         if (mPlayer == null) {
             if (mHandler != null) {
                 Log.e(TAG,"mPlayer == null");
@@ -105,46 +98,60 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
             }
             return;
         }
+        if (TextUtils.isEmpty(data)) {
+            Log.e(TAG,"youtube response data == null");
+            if (mHandler != null) {
+                mHandler.sendEmptyMessage(Player.PLAYER_ERROR);
+            }
+            return;
+        }
         youtubeReq = YoutubeParser.parseYoutubeData(data);
 
         if (youtubeReq != null) {
-            Log.e(TAG,"OnYoutube-author" + youtubeReq.author);
-            Log.e(TAG,"OnYoutube-bigthumb" + youtubeReq.bigthumb);
-            Log.e(TAG,"OnYoutube-bigthumbhd" + youtubeReq.bigthumbhd);
-            Log.e(TAG,"OnYoutube-category" + youtubeReq.category);
-            Log.e(TAG,"OnYoutube-description" + youtubeReq.description);
-            Log.e(TAG,"OnYoutube-duration" + youtubeReq.duration);
-            Log.e(TAG,"OnYoutube-formats" + youtubeReq.formats);
-            Log.e(TAG,"OnYoutube-jsurl" + youtubeReq.jsurl);
-            Log.e(TAG,"OnYoutube-published" + youtubeReq.published);
-            Log.e(TAG,"OnYoutube-rating" + youtubeReq.rating);
-            Log.e(TAG,"OnYoutube-thumb" + youtubeReq.thumb);
-            Log.e(TAG,"OnYoutube-title" + youtubeReq.title);
-            Log.e(TAG,"OnYoutube-videoid" + youtubeReq.videoid);
-            Log.e(TAG,"OnYoutube-ciphertag" + youtubeReq.ciphertag);
-            Log.e(TAG,"OnYoutube-have_basic" + youtubeReq.have_basic);
-            Log.e(TAG,"OnYoutube-have_gdata" + youtubeReq.have_gdata);
-            Log.e(TAG,"OnYoutube-keywords" + youtubeReq.keywords);
-            Log.e(TAG,"OnYoutube-length" + youtubeReq.length);
-            Log.e(TAG,"OnYoutube-viewcount" + youtubeReq.viewcount);
+//            Log.e(TAG,"OnYoutube-author" + youtubeReq.author);
+//            Log.e(TAG,"OnYoutube-bigthumb" + youtubeReq.bigthumb);
+//            Log.e(TAG,"OnYoutube-bigthumbhd" + youtubeReq.bigthumbhd);
+//            Log.e(TAG,"OnYoutube-category" + youtubeReq.category);
+//            Log.e(TAG,"OnYoutube-description" + youtubeReq.description);
+//            Log.e(TAG,"OnYoutube-duration" + youtubeReq.duration);
+//            Log.e(TAG,"OnYoutube-formats" + youtubeReq.formats);
+//            Log.e(TAG,"OnYoutube-jsurl" + youtubeReq.jsurl);
+//            Log.e(TAG,"OnYoutube-published" + youtubeReq.published);
+//            Log.e(TAG,"OnYoutube-rating" + youtubeReq.rating);
+//            Log.e(TAG,"OnYoutube-thumb" + youtubeReq.thumb);
+//            Log.e(TAG,"OnYoutube-title" + youtubeReq.title);
+//            Log.e(TAG,"OnYoutube-videoid" + youtubeReq.videoid);
+//            Log.e(TAG,"OnYoutube-ciphertag" + youtubeReq.ciphertag);
+//            Log.e(TAG,"OnYoutube-have_basic" + youtubeReq.have_basic);
+//            Log.e(TAG,"OnYoutube-have_gdata" + youtubeReq.have_gdata);
+//            Log.e(TAG,"OnYoutube-keywords" + youtubeReq.keywords);
+//            Log.e(TAG,"OnYoutube-length" + youtubeReq.length);
+//            Log.e(TAG,"OnYoutube-viewcount" + youtubeReq.viewcount);
             if (youtubeReq.sm != null && youtubeReq.sm.size() > 0) {
                 mPlayer.playUrl(youtubeReq.sm.get(0).url,false);
-                for (FmtStreamMap info : youtubeReq.sm) {
-                    Log.e(TAG,"OnYoutube-fallbackHost" + info.fallbackHost);
-                    Log.e(TAG,"OnYoutube-itag" + info.itag);
-                    Log.e(TAG,"OnYoutube-quality" + info.quality);
-                    Log.e(TAG,"OnYoutube-s" + info.s);
-                    Log.e(TAG,"OnYoutube-sig" + info.sig);
-                    Log.e(TAG,"OnYoutube-type" + info.type);
-                    Log.e(TAG,"OnYoutube-url" + info.url);
-                    Log.e(TAG,"OnYoutube-url" + info);
-                }
+//                for (FmtStreamMap info : youtubeReq.sm) {
+//                    Log.e(TAG,"OnYoutube-fallbackHost" + info.fallbackHost);
+//                    Log.e(TAG,"OnYoutube-itag" + info.itag);
+//                    Log.e(TAG,"OnYoutube-quality" + info.quality);
+//                    Log.e(TAG,"OnYoutube-s" + info.s);
+//                    Log.e(TAG,"OnYoutube-sig" + info.sig);
+//                    Log.e(TAG,"OnYoutube-type" + info.type);
+//                    Log.e(TAG,"OnYoutube-url" + info.url);
+//                    Log.e(TAG,"OnYoutube-url" + info);
+//                }
             }
         }
     }
 
     @Override
     public void OnVimeo(String data, String msg) {
+        if (mPlayer == null) {
+            if (mHandler != null) {
+                Log.e(TAG,"mPlayer == null");
+                mHandler.sendEmptyMessage(Player.PLAYER_ERROR);
+            }
+            return;
+        }
         if (data == null) {
             Log.e(TAG,"vimeo response data == null");
             if (mHandler != null) {
@@ -156,13 +163,6 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
         if (vimeoVideo == null) {
             Log.e(TAG,"parse vimeo response data error");
             if (mHandler != null) {
-                mHandler.sendEmptyMessage(Player.PLAYER_ERROR);
-            }
-            return;
-        }
-        if (mPlayer == null) {
-            if (mHandler != null) {
-                Log.e(TAG,"mPlayer == null");
                 mHandler.sendEmptyMessage(Player.PLAYER_ERROR);
             }
             return;
@@ -194,6 +194,13 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
     @Override
     public void onComplete(int videoType, String data, String msg) {
         Log.e(TAG,"onComplete()......msg = " + msg);
+        if (mPlayer == null) {
+            if (mHandler != null) {
+                Log.e(TAG,"mPlayer == null");
+                mHandler.sendEmptyMessage(Player.PLAYER_ERROR);
+            }
+            return;
+        }
         if (TextUtils.isEmpty(data)) {
             Log.e(TAG,"response data == null");
             if (mHandler != null) {
@@ -245,5 +252,9 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
             return;
         }
         mPlayer.playUrl(playUrl,false);
+    }
+
+    public YoutubeReq getYoutubeReq () {
+        return youtubeReq;
     }
 }

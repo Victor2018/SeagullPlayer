@@ -21,7 +21,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * SDMC 播放地址为鉴权后的真实播放地址，播放器不做鉴权业务处理
      */
     private static final String M3U8_URL   = "http://ivi.bupt.edu.cn/hls/cctv3.m3u8";
-    private static final String FACEBOOK_URL   = "https://www.facebook.com/misswymma2/videos/599083000439930/";
+//    private static final String FACEBOOK_URL   = "https://www.facebook.com/misswymma2/videos/599083000439930/";
+    private static final String FACEBOOK_URL   = "https://www.facebook.com/1541202502800731/videos/1995585847362392/";
 
     private Button mBtnPlayYoutubeId,mBtnPlayYoutubeUrl,mBtnPlayVimeoId,mBtnPlayVimeoUrl,mBtnPlayM3u8,mBtnPlayFacebook;
 
