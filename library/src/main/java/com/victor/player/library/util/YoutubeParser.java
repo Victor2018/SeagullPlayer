@@ -54,18 +54,6 @@ public class YoutubeParser {
             // 解析流列表(这货又是个啥)
             data.sm = extractStreamMap(Constant.UEFSM, videoInfoMap, TextUtils.isEmpty(data.jsurl));
             data.asm = extractStreamMap(Constant.AF, videoInfoMap, TextUtils.isEmpty(data.jsurl));
-            Log.e(TAG,"----------------------- fetchBasic start ---------------");
-
-            for (FmtStreamMap streamMap : data.sm) {
-                Log.e(TAG,"fetchBasic-streamMap.quality = " + streamMap.quality);
-                Log.e(TAG,"fetchBasic-streamMap.fallbackHost = " + streamMap.fallbackHost);
-                Log.e(TAG,"fetchBasic-streamMap.itag = " + streamMap.itag);
-                Log.e(TAG,"fetchBasic-streamMap.s = " + streamMap.s);
-                Log.e(TAG,"fetchBasic-streamMap.sig = " + streamMap.sig);
-                Log.e(TAG,"fetchBasic-streamMap.type = " + streamMap.type);
-                Log.e(TAG,"fetchBasic-streamMap.url = " + streamMap.url);
-            }
-            Log.e(TAG,"----------------------- fetchBasic end -----------------");
             data.have_basic = true;
         } catch (Exception e) {
             e.printStackTrace();

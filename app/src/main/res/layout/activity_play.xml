@@ -5,12 +5,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".PlayActivity">
-
     <SurfaceView
         android:id="@+id/sv_play"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-
+    <FrameLayout
+        android:id="@+id/fl_player_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
     <ProgressBar
         android:id="@+id/pb_loading"
         android:layout_width="wrap_content"

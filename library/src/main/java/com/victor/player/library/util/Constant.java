@@ -40,6 +40,7 @@ public class Constant {
         public static final int VIMEO                                          = 0x602;
         public static final int SDMC                                           = 0x603;
         public static final int FACEBOOK                                       = 0x604;
+        public static final int YOUTUBE_CHECK                                 = 0x605;
     }
 
     public static class Msg {
@@ -47,6 +48,9 @@ public class Constant {
         public static final int REQUEST_VIMEO_PLAY_URL                         = 0x202;
         public static final int REQUEST_YOUTUBE_PLAY_URL                       = 0x203;
         public static final int REQUEST_FACEBOOK_PLAY_URL                      = 0x204;
+        public static final int REQUEST_YOUTUBE_CHECK_PLAY_URL                = 0x205;
+        public static final int PLAY_BY_YOUTUBE_VIEW                           = 0x206;
+        public static final int PLAY_BY_MEDIA_PLAYER                           = 0x207;
     }
 
     public static HashMap<String,String> getVimeoHttpHeaderParm (String identifier) {

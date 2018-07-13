@@ -63,7 +63,7 @@ public class SeagullPlayeView extends FrameLayout {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 Gravity.CENTER);
         playerContainer.addView(mSurfaceView, 0, params);
-        mPlayHelper = new PlayHelper(mSurfaceView,new Handler());
+//        mPlayHelper = new PlayHelper(mSurfaceView,new Handler());
     }
 
     public void setVideoController(@Nullable SeagullPlayCtrl mediaPlayCtrl) {

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.LongPlayActivity">
+    <SurfaceView
+        android:id="@+id/sv_vimeo_play"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    <com.longtv.player.library.player.YouTubePlayerView
+        android:id="@+id/youtube_player_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <View
+        android:id="@+id/loading_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black" />
+
+    <include layout="@layout/media_ctrl"/>
+
+    <ProgressBar
+        android:id="@+id/pb_pre_loading"
+        android:layout_width="@dimen/dp_70"
+        android:layout_height="@dimen/dp_70"
+        style="@style/Base.Widget.AppCompat.ProgressBar"
+        android:layout_gravity="center"
+        android:indeterminateTint="@color/white"
+        android:visibility="gone"/>
+</FrameLayout>

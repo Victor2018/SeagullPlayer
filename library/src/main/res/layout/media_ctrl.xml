@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fl_media_ctrl"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    android:orientation="vertical"
+    android:layoutDirection="ltr">
+<LinearLayout
+    android:id="@+id/ll_media_ctrl"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center|bottom"
+    android:orientation="vertical"
+    android:gravity="center">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/dp_10"
+        android:background="@color/color_CC000000"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView android:id="@+id/tv_time_pass"
+            android:textSize="@dimen/dp_18"
+            android:textStyle="bold"
+            android:padding="@dimen/dp_10"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00:00"
+            android:textColor="@color/dim_foreground_dark" />
+
+        <SeekBar
+            android:id="@+id/sb_media_progress"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/dp_10"
+            android:paddingRight="@dimen/dp_10"
+            android:background="@null"
+            android:maxHeight="@dimen/dp_3"
+            android:minHeight="@dimen/dp_3"
+            android:max="100"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            tools:ignore="RtlCompat" />
+
+        <TextView android:id="@+id/tv_video_duration"
+            android:textSize="@dimen/dp_18"
+            android:textStyle="bold"
+            android:padding="@dimen/dp_10"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/dim_foreground_dark"
+            android:text="00:00"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/color_CC000000"
+        android:gravity="center"
+        android:padding="@dimen/dp_10"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/ib_back"
+            android:layout_width="@dimen/dp_50"
+            android:layout_height="@dimen/dp_50"/>
+
+        <ImageButton
+            android:id="@+id/ib_play_pause"
+            android:layout_width="@dimen/dp_50"
+            android:layout_height="@dimen/dp_50"
+            android:layout_marginLeft="@dimen/dp_50"
+            android:layout_marginRight="@dimen/dp_50"/>
+        <ImageButton
+            android:id="@+id/ib_forward"
+            android:layout_width="@dimen/dp_50"
+            android:layout_height="@dimen/dp_50"/>
+
+    </LinearLayout>
+</LinearLayout>
+    <ProgressBar
+        android:id="@+id/pb_loading"
+        android:layout_width="@dimen/dp_70"
+        android:layout_height="@dimen/dp_70"
+        style="@style/Base.Widget.AppCompat.ProgressBar"
+        android:layout_gravity="center"
+        android:indeterminateTint="@color/white"
+        android:visibility="gone"/>
+</FrameLayout>

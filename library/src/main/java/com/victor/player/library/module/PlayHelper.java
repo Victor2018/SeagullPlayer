@@ -1,25 +1,34 @@
 package com.victor.player.library.module;
 
+import android.content.Context;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.SurfaceView;
 import android.view.TextureView;
+import android.view.View;
+import android.widget.FrameLayout;
 
-import com.victor.player.library.data.FmtStreamMap;
 import com.victor.player.library.data.VimeoVideo;
 import com.victor.player.library.data.YoutubeReq;
 import com.victor.player.library.interfaces.OnHttpListener;
 import com.victor.player.library.presenter.VimeoPresenterImpl;
+import com.victor.player.library.presenter.YoutubeCheckPresenterImpl;
 import com.victor.player.library.presenter.YoutubePresenterImpl;
 import com.victor.player.library.util.Constant;
 import com.victor.player.library.util.PlayUtil;
 import com.victor.player.library.util.YoutubeParser;
 import com.victor.player.library.view.VimeoView;
+import com.victor.player.library.view.YoutubeCheckView;
 import com.victor.player.library.view.YoutubeView;
+import com.victor.player.library.youtube.PlayStatusListener;
+import com.victor.player.library.youtube.YouTubePlayerView;
 
-public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpListener<String> {
+public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpListener<String>,YoutubeCheckView<String> {
     private String TAG = "PlayHelper";
+    private Context mContext;
+    private FrameLayout mFlPlayContainer;
     private SurfaceView mSurfaceView;
     private TextureView mTextureView;
     private Player mPlayer;
@@ -28,8 +37,22 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
     private VimeoPresenterImpl vimeoPresenter;
     private YoutubeReq youtubeReq;
     private int videoType;
+    private String playUrl;
     private HttpRequestHelper mHttpRequestHelper;
+    private YoutubePlayHelper mYoutubePlayHelper;
+    private YouTubePlayerView mYouTubePlayerView;
 
+    public PlayHelper(Context context,FrameLayout container, Handler handler) {
+        mContext = context;
+        mFlPlayContainer = container;
+        mHandler = handler;
+        mSurfaceView = new SurfaceView(mContext);
+        mFlPlayContainer.addView(mSurfaceView);
+        mYouTubePlayerView = new YouTubePlayerView(mContext);
+        mYoutubePlayHelper = new YoutubePlayHelper(mContext,mYouTubePlayerView);
+
+        init();
+    }
     public PlayHelper(SurfaceView surfaceView, Handler handler) {
         mSurfaceView = surfaceView;
         mHandler = handler;
@@ -44,11 +67,36 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
     private void init () {
         youtubePresenter = new YoutubePresenterImpl(this);
         vimeoPresenter = new VimeoPresenterImpl(this);
-        mHttpRequestHelper = new HttpRequestHelper( this);
+
         mPlayer = mTextureView != null ? new Player(mTextureView,mHandler) : new Player(mSurfaceView,mHandler);
+        mHttpRequestHelper = new HttpRequestHelper( this);
+    }
+
+    public void setPlayStatusListener (PlayStatusListener listener) {
+        if (mYoutubePlayHelper != null) {
+            mYoutubePlayHelper.setPlayStatusListener(listener);
+        }
+    }
+
+    public void setYoutubeVideoName (String videoName) {
+        if (mYoutubePlayHelper != null) {
+            mYoutubePlayHelper.setYoutubeVideoName(videoName);
+        }
+    }
+
+    public void onKeyDown(int keyCode, KeyEvent event) {
+        if (mYoutubePlayHelper != null) {
+            mYoutubePlayHelper.onKeyDown(keyCode,event);
+        }
+    }
+    public void onKeyUp(int keyCode, KeyEvent event) {
+        if (mYoutubePlayHelper != null) {
+            mYoutubePlayHelper.onKeyUp(keyCode,event);
+        }
     }
 
     public synchronized void play(String url) {
+        playUrl = url;
         videoType = PlayUtil.getVideoType(url);
         String identifier = PlayUtil.getVideoId(url);
         switch (videoType) {
@@ -74,6 +122,25 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
     public Player getPlayer () {
         return mPlayer;
     }
+
+    public void pause () {
+        if (mPlayer != null) {
+            mPlayer.pause();
+        }
+        if (mYoutubePlayHelper != null) {
+            mYoutubePlayHelper.pause();
+        }
+    }
+
+    public void resume () {
+        if (mPlayer != null) {
+            mPlayer.resume();
+        }
+        if (mYoutubePlayHelper != null) {
+            mYoutubePlayHelper.resume();
+        }
+    }
+
     public void onDestroy() {
         Log.e(TAG,"onDestroy()......");
         if (mPlayer != null) {
@@ -86,6 +153,14 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
         }
         if (youtubeReq != null) {
             youtubeReq = null;
+        }
+        if (mHttpRequestHelper != null) {
+            mHttpRequestHelper.onDestroy();
+            mHttpRequestHelper = null;
+        }
+        if (mYoutubePlayHelper != null) {
+            mYoutubePlayHelper.onDestroy();
+            mYoutubePlayHelper = null;
         }
     }
 
@@ -108,38 +183,15 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
         youtubeReq = YoutubeParser.parseYoutubeData(data);
 
         if (youtubeReq != null) {
-//            Log.e(TAG,"OnYoutube-author" + youtubeReq.author);
-//            Log.e(TAG,"OnYoutube-bigthumb" + youtubeReq.bigthumb);
-//            Log.e(TAG,"OnYoutube-bigthumbhd" + youtubeReq.bigthumbhd);
-//            Log.e(TAG,"OnYoutube-category" + youtubeReq.category);
-//            Log.e(TAG,"OnYoutube-description" + youtubeReq.description);
-//            Log.e(TAG,"OnYoutube-duration" + youtubeReq.duration);
-//            Log.e(TAG,"OnYoutube-formats" + youtubeReq.formats);
-//            Log.e(TAG,"OnYoutube-jsurl" + youtubeReq.jsurl);
-//            Log.e(TAG,"OnYoutube-published" + youtubeReq.published);
-//            Log.e(TAG,"OnYoutube-rating" + youtubeReq.rating);
-//            Log.e(TAG,"OnYoutube-thumb" + youtubeReq.thumb);
-//            Log.e(TAG,"OnYoutube-title" + youtubeReq.title);
-//            Log.e(TAG,"OnYoutube-videoid" + youtubeReq.videoid);
-//            Log.e(TAG,"OnYoutube-ciphertag" + youtubeReq.ciphertag);
-//            Log.e(TAG,"OnYoutube-have_basic" + youtubeReq.have_basic);
-//            Log.e(TAG,"OnYoutube-have_gdata" + youtubeReq.have_gdata);
-//            Log.e(TAG,"OnYoutube-keywords" + youtubeReq.keywords);
-//            Log.e(TAG,"OnYoutube-length" + youtubeReq.length);
-//            Log.e(TAG,"OnYoutube-viewcount" + youtubeReq.viewcount);
             if (youtubeReq.sm != null && youtubeReq.sm.size() > 0) {
-                mPlayer.playUrl(youtubeReq.sm.get(0).url,false);
-//                for (FmtStreamMap info : youtubeReq.sm) {
-//                    Log.e(TAG,"OnYoutube-fallbackHost" + info.fallbackHost);
-//                    Log.e(TAG,"OnYoutube-itag" + info.itag);
-//                    Log.e(TAG,"OnYoutube-quality" + info.quality);
-//                    Log.e(TAG,"OnYoutube-s" + info.s);
-//                    Log.e(TAG,"OnYoutube-sig" + info.sig);
-//                    Log.e(TAG,"OnYoutube-type" + info.type);
-//                    Log.e(TAG,"OnYoutube-url" + info.url);
-//                    Log.e(TAG,"OnYoutube-url" + info);
-//                }
+//                youtubeCheckPresenter.sendRequest(youtubeReq.sm.get(0).url,null,null);
+//                mPlayer.playUrl(youtubeReq.sm.get(0).url,false);
+                mHttpRequestHelper.sendRequestWithParms(Constant.Msg.REQUEST_YOUTUBE_CHECK_PLAY_URL, youtubeReq.sm.get(0).url);
+            } else {
+                mHandler.sendEmptyMessage(Constant.Msg.PLAY_BY_YOUTUBE_VIEW);
             }
+        } else {
+            mHandler.sendEmptyMessage(Constant.Msg.PLAY_BY_YOUTUBE_VIEW);
         }
     }
 
@@ -193,6 +245,7 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
 
     @Override
     public void onComplete(int videoType, String data, String msg) {
+        Log.e(TAG,"onComplete()......data = " + data);
         Log.e(TAG,"onComplete()......msg = " + msg);
         if (mPlayer == null) {
             if (mHandler != null) {
@@ -212,6 +265,9 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
             case Constant.VideoType.VIMEO:
                 break;
             case Constant.VideoType.YOUTUBE:
+                break;
+            case Constant.VideoType.YOUTUBE_CHECK:
+                playYoutubeCheckUrl(data,msg);
                 break;
             case Constant.VideoType.FACEBOOK:
                 playFacebook(data);
@@ -256,5 +312,29 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
 
     public YoutubeReq getYoutubeReq () {
         return youtubeReq;
+    }
+
+    @Override
+    public void OnYoutubeCheck(String data, String msg) {
+        Log.e(TAG,"data------------------->" + data);
+        Log.e(TAG,"msg-------------------->" + msg);
+    }
+
+    public synchronized void playByYoutubeView () {
+        if (mFlPlayContainer == null) return;
+        if (mYoutubePlayHelper == null) return;
+        mFlPlayContainer.removeView(mSurfaceView);
+        mFlPlayContainer.addView(mYouTubePlayerView);
+        mYoutubePlayHelper.play(playUrl);
+    }
+
+    private void playYoutubeCheckUrl (final String data,final String msg) {
+        Log.e(TAG,"playYoutubeCheckUrl-data------------------->" + data);
+        Log.e(TAG,"playYoutubeCheckUrl-msg-------------------->" + msg);
+        if (data.equals("200")) {
+            mPlayer.playUrl(msg,false);
+        } else if (data.equals("403")) {
+            mHandler.sendEmptyMessage(Constant.Msg.PLAY_BY_YOUTUBE_VIEW);
+        }
     }
 }
