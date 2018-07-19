@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

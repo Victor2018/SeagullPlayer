@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -34,6 +35,7 @@ public class YoutubePlayController extends AbstractYouTubePlayerListener impleme
     // panel is used to intercept clicks on the WebView, I don't want the user to be able to click the WebView directly.
     private SeekBar mSbMediaProgress;
     private TextView mTvVideoName,mTvTimePass,mTvVideoDuration;
+    private ImageView mIvPlayPause;
     private LinearLayout mLayoutMediaCtrl;
 
     private boolean isPlaying = false;
@@ -61,10 +63,12 @@ public class YoutubePlayController extends AbstractYouTubePlayerListener impleme
         mLayoutMediaCtrl = playerUI.findViewById(R.id.ll_media_ctrl);
         mSbMediaProgress = playerUI.findViewById(R.id.sb_media_progress);
         mTvVideoName = playerUI.findViewById(R.id.tv_video_name);
+        mIvPlayPause = playerUI.findViewById(R.id.iv_youtube_play_pause);
         mTvTimePass = playerUI.findViewById(R.id.tv_time_pass);
         mTvVideoDuration = playerUI.findViewById(R.id.tv_video_duration);
 
         mSbMediaProgress.setOnSeekBarChangeListener(this);
+        mIvPlayPause.setOnClickListener(this);
     }
 
     private void initAnim () {
@@ -82,11 +86,11 @@ public class YoutubePlayController extends AbstractYouTubePlayerListener impleme
 
     @Override
     public void onStateChange(@PlayerConstants.PlayerState.State int state) {
-//        if (state == PlayerConstants.PlayerState.PLAYING) {
-//            mIbPlayPause.setImageResource(R.mipmap.ic_vidcontrol_pause_play_00);
-//        } else {
-//            mIbPlayPause.setImageResource(R.mipmap.ic_vidcontrol_pause_play_11);
-//        }
+        if (state == PlayerConstants.PlayerState.PLAYING) {
+            mIvPlayPause.setImageResource(R.mipmap.ic_player_pause);
+        } else {
+            mIvPlayPause.setImageResource(R.mipmap.ic_play);
+        }
         updateControlsState(state);
 
         if(state == PlayerConstants.PlayerState.PLAYING || state == PlayerConstants.PlayerState.PAUSED || state == PlayerConstants.PlayerState.VIDEO_CUED) {
@@ -160,11 +164,13 @@ public class YoutubePlayController extends AbstractYouTubePlayerListener impleme
     @Override
     public void onClick(View v) {
         int i = v.getId();
-        if (i == R.id.ib_play_pause) {
+        if (i == R.id.iv_youtube_play_pause) {
             if (isPlaying) {
                 youTubePlayer.pause();
+                mIvPlayPause.setImageResource(R.mipmap.ic_play);
             } else {
                 youTubePlayer.play();
+                mIvPlayPause.setImageResource(R.mipmap.ic_player_pause);
             }
             isPlaying = !isPlaying;
         }
@@ -203,7 +209,7 @@ public class YoutubePlayController extends AbstractYouTubePlayerListener impleme
         mHandler.sendEmptyMessageDelayed(Constant.Msg.HIDE_PLAY_CTRL_VIEW,8000);
     }
 
-    private void hideMediaCtrlView () {
+    public void hideMediaCtrlView () {
         if(!canFadeControls || !showUI) return;
 
         if (mLayoutMediaCtrl == null) return;

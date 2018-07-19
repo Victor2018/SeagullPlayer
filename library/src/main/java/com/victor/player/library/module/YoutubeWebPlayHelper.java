@@ -22,8 +22,8 @@ import com.victor.player.library.youtube.YouTubePlayerView;
 import com.victor.player.library.youtube.YoutubePlayController;
 import com.victor.player.library.youtube.YoutubePlayEmptyController;
 
-public class YoutubePlayHelper {
-    private String TAG = "YoutubePlayHelper";
+public class YoutubeWebPlayHelper {
+    private String TAG = "YoutubeWebPlayHelper";
     private Context mContext;
 
     private YouTubePlayerView mYouTubePlayerView;
@@ -36,6 +36,7 @@ public class YoutubePlayHelper {
     private String videoId = "";
     private String playUrl = "";
     private String youtubeVideoName;
+    private boolean isTV;
 
     Handler mHandler = new Handler(){
         @Override
@@ -56,11 +57,15 @@ public class YoutubePlayHelper {
             }
         }
     };
-    public YoutubePlayHelper(Context context, YouTubePlayerView youTubePlayerView) {
+    public YoutubeWebPlayHelper(Context context, YouTubePlayerView youTubePlayerView) {
         mContext = context;
         mYouTubePlayerView = youTubePlayerView;
     }
-
+    public YoutubeWebPlayHelper(Context context, YouTubePlayerView youTubePlayerView, boolean isTV) {
+        mContext = context;
+        mYouTubePlayerView = youTubePlayerView;
+        this.isTV = isTV;
+    }
 
     public void setPlayStatusListener (PlayStatusListener listener) {
         mPlayStatusListener = listener;
@@ -84,7 +89,11 @@ public class YoutubePlayHelper {
             return;
         }
         if (isMediaCtrlViewVisible) {
-            youtubePlayerUI = mYouTubePlayerView.inflateCustomPlayerUI(R.layout.youtube_media_ctrl);
+            if (isTV) {
+                youtubePlayerUI = mYouTubePlayerView.inflateCustomPlayerUI(R.layout.youtube_media_ctrl_tv);
+            } else {
+                youtubePlayerUI = mYouTubePlayerView.inflateCustomPlayerUI(R.layout.youtube_media_ctrl);
+            }
         } else {
             youtubePlayerUI = mYouTubePlayerView.inflateCustomPlayerUI(R.layout.media_ctrl_empty);
         }
@@ -119,9 +128,20 @@ public class YoutubePlayHelper {
         },true);
     }
 
+    public void showPlayCtrlView () {
+        if (mYoutubePlayController != null) {
+            mYoutubePlayController.showMediaCtrlView();
+        }
+    }
+    public void hidePlayCtrlView () {
+        if (mYoutubePlayController != null) {
+            mYoutubePlayController.hideMediaCtrlView();
+        }
+    }
+
     public void seekTo (int msec) {
         if (mYouTubePlayer != null) {
-            mYouTubePlayer.seekTo(msec);
+            mYouTubePlayer.seekTo(msec / 1000);
         }
     }
 

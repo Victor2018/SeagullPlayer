@@ -9,7 +9,6 @@ import android.view.KeyEvent;
 import android.view.SurfaceView;
 import android.view.TextureView;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import com.victor.player.library.data.VimeoVideo;
 import com.victor.player.library.data.YoutubeReq;
@@ -28,9 +27,10 @@ import com.victor.player.library.ytparser.VideoMeta;
 import com.victor.player.library.ytparser.YouTubeExtractor;
 import com.victor.player.library.ytparser.YtFile;
 
-public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpListener<String>,YoutubeCheckView<String> {
+public class PlayHelper2 implements YoutubeView<String>,VimeoView<String>,OnHttpListener<String>,YoutubeCheckView<String> {
     private String TAG = "PlayHelper";
     private Context mContext;
+    private FrameLayout mFlPlayContainer;
     private SurfaceView mSurfaceView;
     private TextureView mTextureView;
     private Player mPlayer;
@@ -41,15 +41,39 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
     private int videoType;
     private String playUrl;
     private HttpRequestHelper mHttpRequestHelper;
+    private YoutubeWebPlayHelper mYoutubeWebPlayHelper;
+    private YouTubePlayerView mYouTubePlayerView;
+    private boolean isPlayByYoutubeView;
 
-    public PlayHelper(Context context,SurfaceView surfaceView, Handler handler) {
+    public PlayHelper2(Context context, FrameLayout container, Handler handler) {
         mContext = context;
+        mFlPlayContainer = container;
+        mHandler = handler;
+        mSurfaceView = new SurfaceView(mContext);
+        mFlPlayContainer.addView(mSurfaceView);
+        mYouTubePlayerView = new YouTubePlayerView(mContext);
+        mYoutubeWebPlayHelper = new YoutubeWebPlayHelper(mContext,mYouTubePlayerView);
+        init();
+    }
+    public PlayHelper2(Context context, FrameLayout container, Handler handler, boolean isTV) {
+        mContext = context;
+        mFlPlayContainer = container;
+        if (mFlPlayContainer != null) {
+            mFlPlayContainer.setKeepScreenOn(true);
+        }
+        mHandler = handler;
+        mSurfaceView = new SurfaceView(mContext);
+        mFlPlayContainer.addView(mSurfaceView);
+        mYouTubePlayerView = new YouTubePlayerView(mContext);
+        mYoutubeWebPlayHelper = new YoutubeWebPlayHelper(mContext,mYouTubePlayerView,isTV);
+        init();
+    }
+    public PlayHelper2(SurfaceView surfaceView, Handler handler) {
         mSurfaceView = surfaceView;
         mHandler = handler;
         init();
     }
-    public PlayHelper(Context context,TextureView textureView, Handler handler) {
-        mContext = context;
+    public PlayHelper2(TextureView textureView, Handler handler) {
         mTextureView = textureView;
         mHandler = handler;
         init();
@@ -61,6 +85,29 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
 
         mPlayer = mTextureView != null ? new Player(mTextureView,mHandler) : new Player(mSurfaceView,mHandler);
         mHttpRequestHelper = new HttpRequestHelper( this);
+    }
+
+    public void setPlayStatusListener (PlayStatusListener listener) {
+        if (mYoutubeWebPlayHelper != null) {
+            mYoutubeWebPlayHelper.setPlayStatusListener(listener);
+        }
+    }
+
+    public void setYoutubeVideoName (String videoName) {
+        if (mYoutubeWebPlayHelper != null) {
+            mYoutubeWebPlayHelper.setYoutubeVideoName(videoName);
+        }
+    }
+
+    public void onKeyDown(int keyCode, KeyEvent event) {
+        if (mYoutubeWebPlayHelper != null) {
+            mYoutubeWebPlayHelper.onKeyDown(keyCode,event);
+        }
+    }
+    public void onKeyUp(int keyCode, KeyEvent event) {
+        if (mYoutubeWebPlayHelper != null) {
+            mYoutubeWebPlayHelper.onKeyUp(keyCode,event);
+        }
     }
 
     public synchronized void play(String url) {
@@ -96,43 +143,90 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
         if (mPlayer != null) {
             mPlayer.pause();
         }
+        if (mYoutubeWebPlayHelper != null) {
+            mYoutubeWebPlayHelper.pause();
+        }
     }
 
     public void resume () {
         if (mPlayer != null) {
             mPlayer.resume();
         }
+        if (mYoutubeWebPlayHelper != null) {
+            mYoutubeWebPlayHelper.resume();
+        }
     }
 
     public int getCurrentPosition() {
-        if (mPlayer != null) {
-            return mPlayer.getCurrentPosition();
+        if (isPlayByYoutubeView) {
+            if (mYoutubeWebPlayHelper != null) {
+                return mYoutubeWebPlayHelper.getCurrentPosition();
+            }
+        } else {
+            if (mPlayer != null) {
+                return mPlayer.getCurrentPosition();
+            }
         }
         return 0;
     }
     public int getDuration() {
-        if (mPlayer != null) {
-            return mPlayer.getDuration();
+        if (isPlayByYoutubeView) {
+            if (mYoutubeWebPlayHelper != null) {
+                return mYoutubeWebPlayHelper.getDuration();
+            }
+        } else {
+            if (mPlayer != null) {
+                return mPlayer.getDuration();
+            }
         }
         return 0;
     }
     public int getBufferPercentage() {
-        if (mPlayer != null) {
-            return mPlayer.getBufferPercentage();
+        if (isPlayByYoutubeView) {
+            if (mYoutubeWebPlayHelper != null) {
+                return mYoutubeWebPlayHelper.getBufferPercentage();
+            }
+        } else {
+            if (mPlayer != null) {
+                return mPlayer.getBufferPercentage();
+            }
         }
         return 0;
     }
     public void seekTo(int msec) {
-        if (mPlayer != null) {
-            mPlayer.seekTo(msec);
+        if (isPlayByYoutubeView) {
+            if (mYoutubeWebPlayHelper != null) {
+                mYoutubeWebPlayHelper.seekTo(msec);
+            }
+        } else {
+            if (mPlayer != null) {
+                mPlayer.seekTo(msec);
+            }
         }
     }
 
     public boolean isPlaying () {
-        if (mPlayer != null) {
-            return mPlayer.isPlaying();
+        if (isPlayByYoutubeView) {
+            if (mYoutubeWebPlayHelper != null) {
+                return mYoutubeWebPlayHelper.isPlaying();
+            }
+        } else {
+            if (mPlayer != null) {
+                return mPlayer.isPlaying();
+            }
         }
         return false;
+    }
+
+    public void showPlayCtrlView () {
+        if (mYoutubeWebPlayHelper != null) {
+            mYoutubeWebPlayHelper.showPlayCtrlView();
+        }
+    }
+    public void hidePlayCtrlView () {
+        if (mYoutubeWebPlayHelper != null) {
+            mYoutubeWebPlayHelper.hidePlayCtrlView();
+        }
     }
 
     public void onDestroy() {
@@ -151,6 +245,10 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
         if (mHttpRequestHelper != null) {
             mHttpRequestHelper.onDestroy();
             mHttpRequestHelper = null;
+        }
+        if (mYoutubeWebPlayHelper != null) {
+            mYoutubeWebPlayHelper.onDestroy();
+            mYoutubeWebPlayHelper = null;
         }
     }
 
@@ -310,25 +408,28 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
         Log.e(TAG,"msg-------------------->" + msg);
     }
 
+    public synchronized void playByYoutubeView () {
+        if (mFlPlayContainer == null) return;
+        if (mYoutubeWebPlayHelper == null) return;
+        mFlPlayContainer.removeView(mSurfaceView);
+        mFlPlayContainer.addView(mYouTubePlayerView);
+        mYoutubeWebPlayHelper.play(playUrl);
+    }
+
     private void playYoutubeCheckUrl (final String data,final String msg) {
         Log.e(TAG,"playYoutubeCheckUrl-data------------------->" + data);
         Log.e(TAG,"playYoutubeCheckUrl-msg-------------------->" + msg);
         if (data.equals("200")) {
+            isPlayByYoutubeView = false;
             mPlayer.playUrl(msg,false);
         } else if (data.equals("403")) {
+            isPlayByYoutubeView = true;
             mHandler.sendEmptyMessage(Constant.Msg.PLAY_BY_YOUTUBE_VIEW);
         }
     }
 
     private void playYoutubeByLink (String youtubeLink) {
-        Log.e(TAG,"playYoutubeByLink()-youtubeLink = " + youtubeLink);
-        if (mContext == null) {
-            Log.e(TAG,"playYoutubeByLink()-mContext == null");
-            if (mHandler != null) {
-                mHandler.sendEmptyMessage(Player.PLAYER_ERROR);
-            }
-            return;
-        }
+
         new YouTubeExtractor(mContext) {
             @Override
             public void onExtractionComplete(SparseArray<YtFile> ytFiles, VideoMeta vMeta) {
@@ -339,13 +440,11 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
                         Log.e(TAG,"playYoutubeByLink()-playUrl = " + playUrl);
                         mPlayer.playUrl(playUrl,false);
                     } else {
-                        Log.e(TAG,"ytFile == null");
                         if (mHandler != null) {
                             mHandler.sendEmptyMessage(Player.PLAYER_ERROR);
                         }
                     }
                 } else {
-                    Log.e(TAG,"ytFiles == null or ytFiles.size() == 0");
                     if (mHandler != null) {
                         mHandler.sendEmptyMessage(Player.PLAYER_ERROR);
                     }
