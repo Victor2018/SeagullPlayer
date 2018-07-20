@@ -39,8 +39,10 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
     private VimeoPresenterImpl vimeoPresenter;
     private YoutubeReq youtubeReq;
     private int videoType;
+    private String videoId;
     private String playUrl;
     private HttpRequestHelper mHttpRequestHelper;
+    private int youtubePlayCount;
 
     public PlayHelper(Context context,SurfaceView surfaceView, Handler handler) {
         mContext = context;
@@ -64,22 +66,22 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
     }
 
     public synchronized void play(String url) {
+        youtubePlayCount = 0;
         playUrl = url;
         videoType = PlayUtil.getVideoType(url);
-        String identifier = PlayUtil.getVideoId(url);
+        videoId = PlayUtil.getVideoId(url);
         switch (videoType) {
             case Constant.VideoType.YOUTUBE:
                 Log.e(TAG,"playing youtube......");
-//                youtubePresenter.sendRequest(String.format(Constant.YOUTUBE_URL, identifier),null,null);
-                playYoutubeByLink(url);
+                youtubePresenter.sendRequest(String.format(Constant.YOUTUBE_URL, videoId),null,null);
                 break;
             case Constant.VideoType.VIMEO:
                 Log.e(TAG,"playing vimeo......");
-                vimeoPresenter.sendRequest(String.format(Constant.VIMEO_CONFIG_URL, identifier),Constant.getVimeoHttpHeaderParm(identifier),null);
+                vimeoPresenter.sendRequest(String.format(Constant.VIMEO_CONFIG_URL, videoId),Constant.getVimeoHttpHeaderParm(videoId),null);
                 break;
             case Constant.VideoType.FACEBOOK:
                 Log.e(TAG,"playing facebook......");
-                mHttpRequestHelper.sendRequestWithParms(Constant.Msg.REQUEST_FACEBOOK_PLAY_URL, identifier);
+                mHttpRequestHelper.sendRequestWithParms(Constant.Msg.REQUEST_FACEBOOK_PLAY_URL, videoId);
                 break;
             default:
                 Log.e(TAG,"playing m3u8......");
@@ -316,14 +318,24 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
         if (data.equals("200")) {
             mPlayer.playUrl(msg,false);
         } else if (data.equals("403")) {
+            playYoutubeByLink(videoId);
             mHandler.sendEmptyMessage(Constant.Msg.PLAY_BY_YOUTUBE_VIEW);
         }
     }
 
     private void playYoutubeByLink (String youtubeLink) {
+        youtubePlayCount++;
         Log.e(TAG,"playYoutubeByLink()-youtubeLink = " + youtubeLink);
+        Log.e(TAG,"playYoutubeByLink()-youtubePlayCount = " + youtubePlayCount);
         if (mContext == null) {
             Log.e(TAG,"playYoutubeByLink()-mContext == null");
+            if (mHandler != null) {
+                mHandler.sendEmptyMessage(Player.PLAYER_ERROR);
+            }
+            return;
+        }
+        if (youtubePlayCount > 3) {
+            Log.e(TAG,"playYoutubeByLink()-youtubePlayCount > 3");
             if (mHandler != null) {
                 mHandler.sendEmptyMessage(Player.PLAYER_ERROR);
             }
@@ -332,24 +344,27 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
         new YouTubeExtractor(mContext) {
             @Override
             public void onExtractionComplete(SparseArray<YtFile> ytFiles, VideoMeta vMeta) {
-                if (ytFiles != null && ytFiles.size() > 0) {
-                    YtFile ytFile = ytFiles.get(22);
-                    if (ytFile != null) {
-                        playUrl = ytFile.getUrl();
-                        Log.e(TAG,"playYoutubeByLink()-playUrl = " + playUrl);
-                        mPlayer.playUrl(playUrl,false);
-                    } else {
-                        Log.e(TAG,"ytFile == null");
-                        if (mHandler != null) {
-                            mHandler.sendEmptyMessage(Player.PLAYER_ERROR);
-                        }
-                    }
-                } else {
-                    Log.e(TAG,"ytFiles == null or ytFiles.size() == 0");
-                    if (mHandler != null) {
-                        mHandler.sendEmptyMessage(Player.PLAYER_ERROR);
-                    }
+                if (ytFiles == null) {
+                    Log.e(TAG,"playYoutubeByLink()-ytFiles == null");
+                    playYoutubeByLink(playUrl);
+                    return;
                 }
+                if (ytFiles.size() == 0) {
+                    Log.e(TAG,"playYoutubeByLink()-ytFiles.size() == 0");
+                    playYoutubeByLink(playUrl);
+                    return;
+                }
+
+                YtFile ytFile = ytFiles.get(22);
+                if (ytFile == null) {
+                    Log.e(TAG,"playYoutubeByLink()-ytFile == null");
+                    playYoutubeByLink(playUrl);
+                    return;
+                }
+                youtubePlayCount = 0;
+                playUrl = ytFile.getUrl();
+                Log.e(TAG,"playYoutubeByLink()-playUrl = " + playUrl);
+                mHttpRequestHelper.sendRequestWithParms(Constant.Msg.REQUEST_YOUTUBE_CHECK_PLAY_URL, playUrl);
             }
         }.extract(youtubeLink, true, true);
     }
