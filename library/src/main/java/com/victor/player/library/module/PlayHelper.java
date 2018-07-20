@@ -5,11 +5,8 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.KeyEvent;
 import android.view.SurfaceView;
 import android.view.TextureView;
-import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import com.victor.player.library.data.VimeoVideo;
 import com.victor.player.library.data.YoutubeReq;
@@ -22,8 +19,6 @@ import com.victor.player.library.util.YoutubeParser;
 import com.victor.player.library.view.VimeoView;
 import com.victor.player.library.view.YoutubeCheckView;
 import com.victor.player.library.view.YoutubeView;
-import com.victor.player.library.youtube.PlayStatusListener;
-import com.victor.player.library.youtube.YouTubePlayerView;
 import com.victor.player.library.ytparser.VideoMeta;
 import com.victor.player.library.ytparser.YouTubeExtractor;
 import com.victor.player.library.ytparser.YtFile;
@@ -146,6 +141,11 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
         }
         if (youtubePresenter != null) {
             youtubePresenter.detachView();
+            youtubePresenter = null;
+        }
+        if (vimeoPresenter != null) {
+            vimeoPresenter.detachView();
+            vimeoPresenter = null;
         }
         if (youtubeReq != null) {
             youtubeReq = null;
@@ -359,7 +359,11 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
                     return;
                 }
 
-                YtFile ytFile = ytFiles.get(22);
+                YtFile ytFile = ytFiles.get(22);//720p
+                if (ytFile == null) {
+                    ytFile = ytFiles.get(18);//360p
+                }
+
                 if (ytFile == null) {
                     Log.e(TAG,"playYoutubeByLink()-ytFile == null");
                     playYoutubeByLink(playUrl);

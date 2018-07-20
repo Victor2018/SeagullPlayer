@@ -14,9 +14,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final String YOUTUBE_ID = "lzbJ8E-WjFI";
     private static final String YOUTUBE_URL = "https://www.youtube.com/watch?v=SMcXGeltEQQ";
 //    private static final String YOUTUBE_URL_WB = "https://www.youtube.com/watch?v=unh8kWUuNt4";
-//    private static final String YOUTUBE_URL_WB = "https://www.youtube.com/watch?v=h6DwAox2hF8";
+    private static final String YOUTUBE_URL_WB = "https://www.youtube.com/watch?v=h6DwAox2hF8";
 //    private static final String YOUTUBE_URL_WB = "https://www.youtube.com/watch?v=8g_wa06LlCA";
-    private static final String YOUTUBE_URL_WB = "https://www.youtube.com/watch?v=j-dv_dcdd_a&list=plfgqulnl59anxjegnq9iu12s2j03nmsrr&index=9&t=0s";
 //    private static final String YOUTUBE_URL_WB = "https://www.youtube.com/watch?v=yk2CUjbyyQY";//live
     private static final String VIMEO_ID   = "204150149";
     private static final String VIMEO_URL   = "https://vimeo.com/channels/staffpicks/262705319";

@@ -8,7 +8,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.victor.player.library.util.Constant;
 import com.victor.player.library.util.PlayUtil;
 import com.victor.player.library.ytparser.jsevaluator.JsEvaluator;
 import com.victor.player.library.ytparser.jsevaluator.interfaces.JsCallback;
@@ -37,9 +36,6 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
     private String TAG = "YouTubeExtractor";
     private final static boolean CACHING = true;
 
-    static boolean LOGGING = false;
-
-    private final static String LOG_TAG = "YouTubeExtractor";
     private final static String CACHE_FILE_NAME = "decipher_js_funct";
     private final static int DASH_PARSE_RETRIES = 5;
 
@@ -182,17 +178,6 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
         if (TextUtils.isEmpty(ytUrl)) {
             return null;
         }
-        /*Matcher mat = patYouTubePageLink.matcher(ytUrl);
-        if (mat.find()) {
-            videoID = mat.group(3);
-        } else {
-            mat = patYouTubeShortLink.matcher(ytUrl);
-            if (mat.find()) {
-                videoID = mat.group(3);
-            } else if (ytUrl.matches("\\p{Graph}+?")) {
-                videoID = ytUrl;
-            }
-        }*/
         videoID = PlayUtil.getVideoId(ytUrl);
         Log.e(TAG,"videoID---->" + videoID);
         if (!TextUtils.isEmpty(videoID)) {
@@ -202,7 +187,7 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
                 e.printStackTrace();
             }
         } else {
-            Log.e(LOG_TAG, "Wrong YouTube link format");
+            Log.e(TAG, "Wrong YouTube link format");
         }
         return null;
     }
@@ -216,8 +201,7 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
         String streamMap;
         BufferedReader reader = null;
         URL getUrl = new URL(ytInfoUrl);
-        if(LOGGING)
-            Log.d(LOG_TAG, "infoUrl: " + ytInfoUrl);
+        Log.e(TAG, "getStreamUrls-ytInfoUrl = " + ytInfoUrl);
         HttpURLConnection urlConnection = (HttpURLConnection) getUrl.openConnection();
         urlConnection.setRequestProperty("User-Agent", USER_AGENT);
         try {
@@ -265,8 +249,6 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
                 }
 
                 if (ytFiles.size() == 0) {
-                    if (LOGGING)
-                        Log.d(LOG_TAG, streamMap);
                     return null;
                 }
                 return ytFiles;
@@ -358,11 +340,8 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
             int itag;
             if (mat.find()) {
                 itag = Integer.parseInt(mat.group(1));
-                if (LOGGING)
-                    Log.d(LOG_TAG, "Itag found:" + itag);
                 if (FORMAT_MAP.get(itag) == null) {
-                    if (LOGGING)
-                        Log.d(LOG_TAG, "Itag not in list:" + itag);
+                    Log.e(TAG, "Itag not in list:" + itag);
                     continue;
                 } else if (!includeWebM && FORMAT_MAP.get(itag).getExt().equals("webm")) {
                     continue;
@@ -392,8 +371,7 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
         }
 
         if (encSignatures != null) {
-            if (LOGGING)
-                Log.d(LOG_TAG, "Decipher signatures");
+            Log.e(TAG, "Decipher signatures");
             String signature;
             decipheredSignature = null;
             if (decipherSignature(encSignatures)) {
@@ -431,15 +409,12 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
                     break;
                 } catch (IOException io) {
                     Thread.sleep(5);
-                    if (LOGGING)
-                        Log.d(LOG_TAG, "Failed to parse dash manifest " + (i + 1));
+                    Log.e(TAG, "Failed to parse dash manifest " + (i + 1));
                 }
             }
         }
 
         if (ytFiles.size() == 0) {
-            if (LOGGING)
-                Log.d(LOG_TAG, streamMap);
             return null;
         }
         return ytFiles;
@@ -471,13 +446,11 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
                 urlConnection.disconnect();
             }
 
-            if (LOGGING)
-                Log.d(LOG_TAG, "Decipher FunctURL: " + decipherFunctUrl);
+            Log.e(TAG, "Decipher FunctURL: " + decipherFunctUrl);
             Matcher mat = patSignatureDecFunction.matcher(javascriptFile);
             if (mat.find()) {
                 decipherFunctionName = mat.group(1);
-                if (LOGGING)
-                    Log.d(LOG_TAG, "Decipher Functname: " + decipherFunctionName);
+                Log.e(TAG, "Decipher Functname: " + decipherFunctionName);
 
                 Pattern patMainVariable = Pattern.compile("(var |\\s|,|;)" + decipherFunctionName.replace("$", "\\$") +
                         "(=function\\((.{1,3})\\)\\{)");
@@ -550,8 +523,7 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
                     }
                 }
 
-                if (LOGGING)
-                    Log.d(LOG_TAG, "Decipher Function: " + decipherFunctions);
+                Log.e(TAG, "Decipher Function: " + decipherFunctions);
                 decipherViaWebView(encSignatures);
                 if (CACHING) {
                     writeDeciperFunctToChache();
@@ -759,8 +731,7 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
                     public void onError(String errorMessage) {
                         lock.lock();
                         try {
-                            if(LOGGING)
-                                Log.e(LOG_TAG, errorMessage);
+                            Log.e(TAG, errorMessage);
                             jsExecuting.signal();
                         } finally {
                             lock.unlock();
