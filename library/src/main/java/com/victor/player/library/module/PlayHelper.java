@@ -174,17 +174,21 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
         }
         youtubeReq = YoutubeParser.parseYoutubeData(data);
 
-        if (youtubeReq != null) {
-            if (youtubeReq.sm != null && youtubeReq.sm.size() > 0) {
-//                youtubeCheckPresenter.sendRequest(youtubeReq.sm.get(0).url,null,null);
-//                mPlayer.playUrl(youtubeReq.sm.get(0).url,false);
-                mHttpRequestHelper.sendRequestWithParms(Constant.Msg.REQUEST_YOUTUBE_CHECK_PLAY_URL, youtubeReq.sm.get(0).url);
-            } else {
-                mHandler.sendEmptyMessage(Constant.Msg.PLAY_BY_YOUTUBE_VIEW);
-            }
-        } else {
-            mHandler.sendEmptyMessage(Constant.Msg.PLAY_BY_YOUTUBE_VIEW);
+        if (youtubeReq == null) {
+            playYoutubeByLink(videoId);
+            return;
         }
+        if (youtubeReq.sm == null) {
+            playYoutubeByLink(videoId);
+            return;
+        }
+        if (youtubeReq.sm.size() == 0) {
+            playYoutubeByLink(videoId);
+            return;
+        }
+//        youtubeCheckPresenter.sendRequest(youtubeReq.sm.get(0).url,null,null);
+//        mPlayer.playUrl(youtubeReq.sm.get(0).url,false);
+        mHttpRequestHelper.sendRequestWithParms(Constant.Msg.REQUEST_YOUTUBE_CHECK_PLAY_URL, youtubeReq.sm.get(0).url);
     }
 
     @Override

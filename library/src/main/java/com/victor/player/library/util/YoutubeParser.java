@@ -21,7 +21,12 @@ public class YoutubeParser {
         YoutubeReq data = new YoutubeReq();
         try {
             HashMap<String, String> videoInfoMap = getVideoInfoMap(new Scanner(response), "utf-8");
-            data.title = videoInfoMap.get("title").replace("/", "-");
+            String title = videoInfoMap.get("title");
+            if (!TextUtils.isEmpty(title)) {
+                if (videoInfoMap.get("title").contains("/")) {
+                    data.title = videoInfoMap.get("title").replace("/", "-");
+                }
+            }
             data.author = videoInfoMap.get("author");
             data.videoid = videoInfoMap.get("video_id");
             data.rating = videoInfoMap.get("avg_rating");
