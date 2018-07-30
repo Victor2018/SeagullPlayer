@@ -27,6 +27,7 @@ public class YoutubeParser {
                     data.title = videoInfoMap.get("title").replace("/", "-");
                 }
             }
+            data.hlsvp = videoInfoMap.get("hlsvp");
             data.author = videoInfoMap.get("author");
             data.videoid = videoInfoMap.get("video_id");
             data.rating = videoInfoMap.get("avg_rating");
@@ -46,11 +47,11 @@ public class YoutubeParser {
             // 5/320x240/7/0/0,
             // 36/320x240/99/1/0,
             // 17/176x144/99/1/0
-            String fmtList = videoInfoMap.get("fmt_list");
-            String[] fmtArray = fmtList.split(",");
-            for (String fmt : fmtArray) {
-                String[] format = fmt.split("/");
-            }
+//            String fmtList = videoInfoMap.get("fmt_list");
+//            String[] fmtArray = fmtList.split(",");
+//            for (String fmt : fmtArray) {
+//                String[] format = fmt.split("/");
+//            }
 //            data.keywords = videoInfoMap.get("keywords").split(",");
             data.bigthumb = videoInfoMap.get("iurlsd");
             data.bigthumbhd = videoInfoMap.get("iurlsdmaxres");
@@ -136,13 +137,17 @@ public class YoutubeParser {
      * @param empty
      *            //这货是做啥用的 */
     public static List<FmtStreamMap> extractStreamMap(String uefsm2, HashMap<String, String> videoInfoMap, boolean empty) {
-        List<FmtStreamMap> streamMaps = new ArrayList<FmtStreamMap>();
+        List<FmtStreamMap> streamMaps = new ArrayList<>();
         if (videoInfoMap != null && videoInfoMap.containsKey(uefsm2)) {
             String uefms2 = videoInfoMap.get(uefsm2);
-            String[] uefms2s = uefms2.split(",");
-            for (String s : uefms2s) {
-                FmtStreamMap streamMap = YoutubeParser.parseFmtStreamMap(new Scanner(s), "utf-8");
-                streamMaps.add(streamMap);
+            if (!TextUtils.isEmpty(uefms2)) {
+                if (uefms2.contains(",")) {
+                    String[] uefms2s = uefms2.split(",");
+                    for (String s : uefms2s) {
+                        FmtStreamMap streamMap = YoutubeParser.parseFmtStreamMap(new Scanner(s), "utf-8");
+                        streamMaps.add(streamMap);
+                    }
+                }
             }
         }
         return streamMaps;

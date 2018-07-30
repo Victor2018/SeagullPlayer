@@ -17,11 +17,11 @@
         android:textAllCaps="false"
         android:text="play youtube url"/>
     <Button
-        android:id="@+id/btn_play_youtube_url_wb"
+        android:id="@+id/btn_play_youtube_live"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAllCaps="false"
-        android:text="play youtube url in webview"/>
+        android:text="play youtube live"/>
 
     <Button
         android:id="@+id/btn_play_vimeo_id"
