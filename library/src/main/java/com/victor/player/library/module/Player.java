@@ -436,6 +436,10 @@ public class Player implements TextureView.SurfaceTextureListener,
             mSurfaceTexture.release();
             mSurfaceTexture = null;
         }
+        if (mSurface != null) {
+            mSurface.release();
+            mSurface = null;
+        }
     }
 
     public String getLastPlayUrl () {
