@@ -52,6 +52,7 @@ public class Constant {
         public static final int PLAY_BY_YOUTUBE_VIEW                           = 0x206;
         public static final int PLAY_BY_MEDIA_PLAYER                           = 0x207;
         public static final int PLAY_VIDEO                                       = 0x208;
+        public static final int PAUSE_PLAYER                                     = 0x209;
     }
 
     public static HashMap<String,String> getVimeoHttpHeaderParm (String identifier) {

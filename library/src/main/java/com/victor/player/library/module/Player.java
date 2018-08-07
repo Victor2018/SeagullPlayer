@@ -177,7 +177,6 @@ public class Player implements TextureView.SurfaceTextureListener,
                 mNotifyHandler.sendEmptyMessage(PLAYER_PREPARED);
             }
             mp.start();
-
         }
     }
 
@@ -385,12 +384,14 @@ public class Player implements TextureView.SurfaceTextureListener,
         Log.e(TAG, "replay()......replayCount = " + replayCount);
         if (replayCount >= 3) {
             replayCount = 0;
-            stop();
-            if (mNotifyHandler != null) {
-                mNotifyHandler.removeMessages(PLAYER_ERROR);
-                mNotifyHandler.sendEmptyMessage(PLAYER_ERROR);
+            if (!mIsLive) {
+                stop();
+                if (mNotifyHandler != null) {
+                    mNotifyHandler.removeMessages(PLAYER_ERROR);
+                    mNotifyHandler.sendEmptyMessage(PLAYER_ERROR);
+                }
+                return;
             }
-            return;
         }
         if (!TextUtils.isEmpty(mPlayUrl)) {
             playUrl(mPlayUrl,mIsLive);

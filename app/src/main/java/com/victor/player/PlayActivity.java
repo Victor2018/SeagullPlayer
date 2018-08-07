@@ -1,59 +1,45 @@
 package com.victor.player;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.victor.player.library.module.Player;
 import com.victor.player.library.module.PlayHelper;
 import com.victor.player.library.util.Constant;
+import com.victor.player.library.util.Loger;
+import com.victor.player.widget.VideoPlayCtrlView;
 
 public class PlayActivity extends AppCompatActivity {
     private String TAG = "PlayActivity";
     private static final String YOUTUBE_ID = "SMcXGeltEQQ";
     private String playUrl = YOUTUBE_ID;
     private SurfaceView mSvPlay;
-    private ProgressBar mPbLoading;
-    private PlayHelper mPlayHelper;
+    private VideoPlayCtrlView mVideoPlayCtrlView;
+    private HomeWatcherReceiver mHomeWatcherReceiver = null;
 
-    Handler mHandler = new Handler() {
+    Handler mHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case Player.PLAYER_PREPARING:
-                    mPbLoading.setVisibility(View.VISIBLE);
-                    break;
-                case Player.PLAYER_BUFFERING_START:
-                    mPbLoading.setVisibility(View.VISIBLE);
-                    break;
-                case Player.PLAYER_BUFFERING_END:
-                    mPbLoading.setVisibility(View.GONE);
-                    break;
-                case Player.PLAYER_PREPARED:
-                    mPbLoading.setVisibility(View.GONE);
-                    break;
-                case Player.PLAYER_PROGRESS_INFO:
-                    break;
-                case Player.PLAYER_COMPLETE:
-                    break;
-                case Player.PLAYER_SEEK_END:
-                    break;
-                case Player.PLAYER_PLAYING:
-                    break;
-                case Player.PLAYER_PAUSE:
-                    break;
-                case Player.PLAYER_ERROR:
-                    mPbLoading.setVisibility(View.GONE);
-                    Toast.makeText(getApplicationContext(), "播放失败！", Toast.LENGTH_SHORT).show();
-                    break;
-                case Constant.Msg.PLAY_VIDEO:
-                    mPlayHelper.play(playUrl);
+                case Constant.Msg.PAUSE_PLAYER:
+                    if (mVideoPlayCtrlView != null) {
+                        mVideoPlayCtrlView.pause();
+                    }
                     break;
             }
         }
@@ -68,11 +54,15 @@ public class PlayActivity extends AppCompatActivity {
     }
 
     private void initialze () {
+        registerReceiver();
         mSvPlay = findViewById(R.id.sv_play);
-        mPbLoading = findViewById(R.id.pb_loading);
+        mVideoPlayCtrlView = findViewById(R.id.play_ctrl_view);
 
-        mPlayHelper = new PlayHelper(this,mSvPlay,mHandler);
-        mPlayHelper.play(playUrl);
+        mVideoPlayCtrlView.init(this,mSvPlay);
+        mVideoPlayCtrlView.setLandscape(true);
+        mVideoPlayCtrlView.play(playUrl);
+//        mPlayHelper = new PlayHelper(this,mSvPlay,mHandler);
+//        mPlayHelper.play(playUrl);
     }
 
     private void initData () {
@@ -81,27 +71,81 @@ public class PlayActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        if (mPlayHelper != null) {
-            mPlayHelper.pause();
+    protected void onStart() {
+        super.onStart();
+        if (mVideoPlayCtrlView != null) {
+            mVideoPlayCtrlView.onStart(this);
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (mPlayHelper != null && mPlayHelper.getPlayer() != null) {
-            mPlayHelper.resume();
+        if (mVideoPlayCtrlView != null) {
+            mVideoPlayCtrlView.resume();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mVideoPlayCtrlView != null) {
+            mVideoPlayCtrlView.pause();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mVideoPlayCtrlView != null) {
+            mVideoPlayCtrlView.onStop();
         }
     }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-        if (mPlayHelper != null) {
-            mPlayHelper.onDestroy();
-            mPlayHelper = null;
+        if (mVideoPlayCtrlView != null) {
+            mVideoPlayCtrlView.onDestroy();
+            mVideoPlayCtrlView = null;
         }
+        unRegisterReceiver();
+        super.onDestroy();
+    }
+
+    private void registerReceiver() {
+        mHomeWatcherReceiver = new HomeWatcherReceiver();
+        IntentFilter filter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        registerReceiver(mHomeWatcherReceiver, filter);
+    }
+    private void unRegisterReceiver() {
+        if (mHomeWatcherReceiver != null) {
+            try {
+                unregisterReceiver(mHomeWatcherReceiver);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public class HomeWatcherReceiver extends BroadcastReceiver {
+
+        private static final String SYSTEM_DIALOG_REASON_KEY = "reason";
+        private static final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            String intentAction = intent.getAction();
+            Loger.e(TAG, "intentAction =" + intentAction);
+            if (TextUtils.equals(intentAction, Intent.ACTION_CLOSE_SYSTEM_DIALOGS)) {
+                String reason = intent.getStringExtra(SYSTEM_DIALOG_REASON_KEY);
+                Loger.e(TAG,  "reason =" + reason);
+                if (TextUtils.equals(SYSTEM_DIALOG_REASON_HOME_KEY, reason)) {
+                    mHandler.sendEmptyMessage(Constant.Msg.PAUSE_PLAYER);
+                }
+            }
+        }
+
     }
 }

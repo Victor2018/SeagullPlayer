@@ -2,6 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fl_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:keepScreenOn="true"
@@ -10,14 +11,9 @@
         android:id="@+id/sv_play"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-   <!-- <FrameLayout
-        android:id="@+id/fl_player_container"
+    <com.victor.player.widget.VideoPlayCtrlView
+        android:id="@+id/play_ctrl_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>-->
-    <ProgressBar
-        android:id="@+id/pb_loading"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"/>
+        android:layout_height="match_parent"/>
 
 </FrameLayout>
