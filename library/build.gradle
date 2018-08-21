@@ -44,6 +44,7 @@ dependencies {
     implementation 'com.github.Victor2018:HttpLib:v2.7'
     compile 'com.github.Victor2018:ScreenMatchLib:v1.0'
     implementation files('libs/jsoup-1.11.3.jar')
+    implementation files('libs/dom4j-1.6.1.jar')
 }
 
 def SDK_BASENAME = "LongPlayer";

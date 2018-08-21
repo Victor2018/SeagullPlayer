@@ -37,7 +37,15 @@
             android:marqueeRepeatLimit="marquee_forever"
             tools:text="Zootopia" />
     </LinearLayout>
-
+    <TextView
+        android:id="@+id/tv_subtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/dp_10"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="@dimen/dp_28"/>
     <LinearLayout
         android:id="@+id/ll_ctrl_bottom"
         android:layout_width="match_parent"

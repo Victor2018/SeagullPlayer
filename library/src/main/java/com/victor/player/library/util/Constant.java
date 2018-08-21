@@ -17,6 +17,8 @@ public class Constant {
     public static final String WATCHV = "http://www.youtube.com/watch?v=%s";
     public static final String YOUTUBE_URL = "http://www.youtube.com/get_video_info?video_id=%s&asv=3&el=detailpage&hl=en_US";
     public static final String PLAYLIST = "http://www.youtube.com/list_ajax?style=json&action_get_list=1&list=%s";
+    public static final String SUB_TITLE_LIST = "http://video.google.com/timedtext?type=list&v=%s";
+    public static final String SUB_TITLE      = "http://video.google.com/timedtext?type=track&v=%s&id=%d&lang=%s";
     public static final String USERAGENT = "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)";
     public static final String UEFSM = "url_encoded_fmt_stream_map";
     public static final String AF = "adaptive_fmts";

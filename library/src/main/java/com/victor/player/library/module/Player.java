@@ -13,6 +13,10 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.TextureView;
 
+import com.victor.player.library.data.SubTitleInfo;
+
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -63,6 +67,7 @@ public class Player implements TextureView.SurfaceTextureListener,
     private boolean isTimerRun;
 
     private int mBufferPercentage;
+    private HashMap<Integer,SubTitleInfo> subTitleInfos;
 
     private Player(Handler handler) {
         mNotifyHandler = handler;
@@ -326,6 +331,7 @@ public class Player implements TextureView.SurfaceTextureListener,
 
         public void run() {
             Message msg = new Message();
+            msg.obj = showSubTitle();
             msg.what = PLAYER_PROGRESS_INFO;
             if (mNotifyHandler != null) {
                 mNotifyHandler.sendMessage(msg);
@@ -487,5 +493,30 @@ public class Player implements TextureView.SurfaceTextureListener,
         }
 
         isTimerRun = false;
+    }
+
+    public void setSubTitle (HashMap<Integer,SubTitleInfo> datas) {
+        subTitleInfos = datas;
+    }
+
+    public String showSubTitle () {
+        String subTitle = "";
+        if (subTitleInfos == null) {
+            return subTitle;
+        }
+        if (subTitleInfos.size() == 0) {
+            return subTitle;
+        }
+        int currentPosition = getCurrentPosition();
+        Iterator<Integer> keys = subTitleInfos.keySet().iterator();
+        while (keys.hasNext()) {
+            Integer key = keys.next();
+            SubTitleInfo bean = subTitleInfos.get(key);
+            if (currentPosition > bean.beginTime && currentPosition < bean.endTime) {
+                subTitle = bean.srtBody;
+                break;
+            }
+        }
+        return subTitle;
     }
 }

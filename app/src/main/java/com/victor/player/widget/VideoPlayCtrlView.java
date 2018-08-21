@@ -43,6 +43,7 @@ public class VideoPlayCtrlView extends RelativeLayout implements SeekBar.OnSeekB
     private MovingTextView mTvPlayName;
     private ProgressBar mPbMediaVolume,mPbMediaBright;
     private ProgressBar mPbLoading;
+    private TextView mTvSubTitle;
     private LinearLayout mLayoutCtrlTop,mLayoutCtrlBottom,mLayoutMediaVolBox,
             mLayoutMediaBrightBox,mLayoutMediaFastForwardBox;
     private ImageView mIvBack,mIconMediaVol,mIvMediaFastForward,mIvPlayPause,mIvCenterPlay;
@@ -78,6 +79,7 @@ public class VideoPlayCtrlView extends RelativeLayout implements SeekBar.OnSeekB
     Handler mHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
+            if (mActivity == null) return;
             switch (msg.what) {
                 case Player.PLAYER_PREPARING:
                     mPbLoading.setVisibility(View.VISIBLE);
@@ -119,6 +121,7 @@ public class VideoPlayCtrlView extends RelativeLayout implements SeekBar.OnSeekB
                         int elapseMsec = mPlayCtrl.getCurrentPosition();
                         updateProgress(elapseMsec);
                     }
+                    mTvSubTitle.setText(msg.obj.toString());
                     break;
                 case Player.PLAYER_COMPLETE:
                     break;
@@ -177,6 +180,7 @@ public class VideoPlayCtrlView extends RelativeLayout implements SeekBar.OnSeekB
         mIvCenterPlay = findViewById(R.id.iv_center_play);
         mIvMediaFastForward = findViewById(R.id.iv_media_fastforward);
         mPbLoading = findViewById(R.id.pb_loading);
+        mTvSubTitle = findViewById(R.id.tv_subtitle);
 
         mIvBack = findViewById(R.id.iv_back);
         mRlCtrl = findViewById(R.id.rl_video_ctrl);
