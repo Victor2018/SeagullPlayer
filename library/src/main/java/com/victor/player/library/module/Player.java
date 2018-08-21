@@ -178,7 +178,7 @@ public class Player implements TextureView.SurfaceTextureListener,
 
         if (videoHeight != 0 && videoWidth != 0) {
             if (mNotifyHandler != null) {
-                mNotifyHandler.sendEmptyMessage(PLAYER_PREPARED);
+                mNotifyHandler.removeMessages(PLAYER_PREPARED);
                 mNotifyHandler.sendEmptyMessage(PLAYER_PREPARED);
             }
             mp.start();
