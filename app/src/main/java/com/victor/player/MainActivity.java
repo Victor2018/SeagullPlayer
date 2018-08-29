@@ -12,7 +12,8 @@ import com.victor.player.library.util.Constant;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
     private String TAG = "PlayActivity";
 //    private static final String YOUTUBE_ID = "lzbJ8E-WjFI";
-    private static final String YOUTUBE_ID = "gP1gl8Ht3qk";
+//    private static final String YOUTUBE_ID = "gP1gl8Ht3qk";
+    private static final String YOUTUBE_ID = "P59EwQ_vE5o";
     private static final String YOUTUBE_URL = "https://www.youtube.com/watch?v=SMcXGeltEQQ";
 //    private static final String YOUTUBE_URL = "https://www.youtube.com/watch?v=unh8kWUuNt4";
 //    private static final String YOUTUBE_URL = "https://www.youtube.com/watch?v=h6DwAox2hF8";

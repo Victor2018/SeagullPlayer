@@ -496,7 +496,15 @@ public class PlayHelper implements YoutubeView<String>,VimeoView<String>,OnHttpL
                 SubTitleInfo data = new SubTitleInfo();
                 data.beginTime = (int) (Double.parseDouble(e.attributeValue("start")) * 1000);
                 data.endTime = data.beginTime + (int) (Double.parseDouble(e.attributeValue("dur")) * 1000);
-                data.srtBody = e.getStringValue();
+                String subTitle = e.getStringValue();
+                if (!TextUtils.isEmpty(subTitle)) {
+                    subTitle = subTitle.replaceAll("&quot;", "\"");
+                    subTitle = subTitle.replaceAll("&amp;", "&");
+                    subTitle = subTitle.replaceAll("&#39;", "'");
+                    subTitle = subTitle.replaceAll("&lt;", "<");
+                    subTitle = subTitle.replaceAll("&gt;", ">");
+                    data.srtBody = subTitle;
+                }
                 datas.put(key, data);
                 key++;
             }
