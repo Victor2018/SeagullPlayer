@@ -4,11 +4,10 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.TextUtils;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.victor.player.library.util.PlayUtil;
 import com.victor.player.library.ytparser.jsevaluator.JsEvaluator;
 import com.victor.player.library.ytparser.jsevaluator.interfaces.JsCallback;
 
@@ -21,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -35,16 +35,16 @@ import java.util.regex.Pattern;
 public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArray<YtFile>> {
     private String TAG = "YouTubeExtractor";
     private final static boolean CACHING = true;
-
     private final static String CACHE_FILE_NAME = "decipher_js_funct";
     private final static int DASH_PARSE_RETRIES = 5;
 
-    private Context context;
+    private WeakReference<Context> refContext;
     private String videoID;
     private VideoMeta videoMeta;
     private boolean includeWebM = true;
     private boolean useHttp = false;
     private boolean parseDashManifest = false;
+    private String cacheDirPath;
 
     private volatile String decipheredSignature;
 
@@ -70,19 +70,21 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
     private static final Pattern patChannelId = Pattern.compile("ucid=(.+?)(&|\\z)");
     private static final Pattern patLength = Pattern.compile("length_seconds=(\\d+?)(&|\\z)");
     private static final Pattern patViewCount = Pattern.compile("view_count=(\\d+?)(&|\\z)");
+    private static final Pattern patStatusOk = Pattern.compile("status=ok(&|,|\\z)");
 
     private static final Pattern patHlsvp = Pattern.compile("hlsvp=(.+?)(&|\\z)");
     private static final Pattern patHlsItag = Pattern.compile("/itag/(\\d+?)/");
 
     private static final Pattern patItag = Pattern.compile("itag=([0-9]+?)([&,])");
     private static final Pattern patEncSig = Pattern.compile("s=([0-9A-F|.]{10,}?)([&,\"])");
-    private static final Pattern patIsSigEnc = Pattern.compile("s%3D([0-9A-F|.]{10,}?)%26");
+    private static final Pattern patIsSigEnc = Pattern.compile("s%3D([0-9A-F|.]{10,}?)(%26|%2C)");
     private static final Pattern patUrl = Pattern.compile("url=(.+?)([&,])");
 
     private static final Pattern patVariableFunction = Pattern.compile("([{; =])([a-zA-Z$][a-zA-Z0-9$]{0,2})\\.([a-zA-Z$][a-zA-Z0-9$]{0,2})\\(");
     private static final Pattern patFunction = Pattern.compile("([{; =])([a-zA-Z$_][a-zA-Z0-9$]{0,2})\\(");
-    private static final Pattern patDecryptionJsFile = Pattern.compile("jsbin\\\\/(player-(.+?).js)");
-    private static final Pattern patSignatureDecFunction = Pattern.compile("\"signature\",(.{1,3}?)\\(.{1,10}?\\)");
+  
+    private static final Pattern patDecryptionJsFile = Pattern.compile("jsbin\\\\/(player(_ias)?-(.+?).js)");
+    private static final Pattern patSignatureDecFunction = Pattern.compile("(\\w+)\\s*=\\s*function\\((\\w+)\\).\\s*\\2=\\s*\\2\\.split\\(\"\"\\)\\s*;");
 
     private static final SparseArray<Format> FORMAT_MAP = new SparseArray<>();
 
@@ -145,15 +147,15 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
         FORMAT_MAP.put(96, new Format(96, "mp4", 1080 ,Format.VCodec.H264, Format.ACodec.AAC, 256, false, true));
     }
 
-    public YouTubeExtractor(Context con) {
-        context = con;
+    public YouTubeExtractor(@NonNull Context con) {
+        refContext = new WeakReference<>(con);
+        cacheDirPath = con.getCacheDir().getAbsolutePath();
     }
 
     @Override
     protected void onPostExecute(SparseArray<YtFile> ytFiles) {
         onExtractionComplete(ytFiles, videoMeta);
     }
-
 
     /**
      * Start the extraction.
@@ -174,13 +176,21 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
     protected SparseArray<YtFile> doInBackground(String... params) {
         videoID = null;
         String ytUrl = params[0];
-        Log.e(TAG,"ytUrl---->" + ytUrl);
-        if (TextUtils.isEmpty(ytUrl)) {
+        if (ytUrl == null) {
             return null;
         }
-        videoID = PlayUtil.getVideoId(ytUrl);
-        Log.e(TAG,"videoID---->" + videoID);
-        if (!TextUtils.isEmpty(videoID)) {
+        Matcher mat = patYouTubePageLink.matcher(ytUrl);
+        if (mat.find()) {
+            videoID = mat.group(3);
+        } else {
+            mat = patYouTubeShortLink.matcher(ytUrl);
+            if (mat.find()) {
+                videoID = mat.group(3);
+            } else if (ytUrl.matches("\\p{Graph}+?")) {
+                videoID = ytUrl;
+            }
+        }
+        if (videoID != null) {
             try {
                 return getStreamUrls();
             } catch (Exception e) {
@@ -193,15 +203,17 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
     }
 
     private SparseArray<YtFile> getStreamUrls() throws IOException, InterruptedException {
-        Log.e(TAG, "getStreamUrls()......");
+        Log.e(TAG,"getStreamUrls()......");
         String ytInfoUrl = (useHttp) ? "http://" : "https://";
         ytInfoUrl += "www.youtube.com/get_video_info?video_id=" + videoID + "&eurl="
                 + URLEncoder.encode("https://youtube.googleapis.com/v/" + videoID, "UTF-8");
+
         String dashMpdUrl = null;
         String streamMap;
         BufferedReader reader = null;
         URL getUrl = new URL(ytInfoUrl);
-        Log.e(TAG, "getStreamUrls-ytInfoUrl = " + ytInfoUrl);
+        Log.e(TAG, "getStreamUrls()0infoUrl =" + ytInfoUrl);
+
         HttpURLConnection urlConnection = (HttpURLConnection) getUrl.openConnection();
         urlConnection.setRequestProperty("User-Agent", USER_AGENT);
         try {
@@ -249,6 +261,7 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
                 }
 
                 if (ytFiles.size() == 0) {
+                    Log.e(TAG, streamMap);
                     return null;
                 }
                 return ytFiles;
@@ -258,22 +271,28 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
 
         // "use_cipher_signature" disappeared, we check whether at least one ciphered signature
         // exists int the stream_map.
-        boolean sigEnc = true;
+        boolean sigEnc = true, statusFail = false;
         if(streamMap != null && streamMap.contains(STREAM_MAP_STRING)){
             String streamMapSub = streamMap.substring(streamMap.indexOf(STREAM_MAP_STRING));
             mat = patIsSigEnc.matcher(streamMapSub);
-            if(!mat.find())
+            if(!mat.find()) {
                 sigEnc = false;
+
+                if (!patStatusOk.matcher(streamMap).find())
+                    statusFail = true;
+            }
         }
 
         // Some videos are using a ciphered signature we need to get the
         // deciphering js-file from the youtubepage.
-        if (sigEnc) {
+        if (sigEnc || statusFail) {
             // Get the video directly from the youtubepage
             if (CACHING
                     && (decipherJsFileName == null || decipherFunctions == null || decipherFunctionName == null)) {
                 readDecipherFunctFromCache();
             }
+            Log.d(TAG, "Get from youtube page");
+            
             getUrl = new URL("https://youtube.com/watch?v=" + videoID);
             urlConnection = (HttpURLConnection) getUrl.openConnection();
             urlConnection.setRequestProperty("User-Agent", USER_AGENT);
@@ -297,6 +316,8 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
             mat = patDecryptionJsFile.matcher(streamMap);
             if (mat.find()) {
                 curJsFileName = mat.group(1).replace("\\/", "/");
+                if (mat.group(2) != null)
+                    curJsFileName.replace(mat.group(2), "");
                 if (decipherJsFileName == null || !decipherJsFileName.equals(curJsFileName)) {
                     decipherFunctions = null;
                     decipherFunctionName = null;
@@ -340,6 +361,7 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
             int itag;
             if (mat.find()) {
                 itag = Integer.parseInt(mat.group(1));
+                Log.e(TAG, "Itag found:" + itag);
                 if (FORMAT_MAP.get(itag) == null) {
                     Log.e(TAG, "Itag not in list:" + itag);
                     continue;
@@ -371,7 +393,7 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
         }
 
         if (encSignatures != null) {
-            Log.e(TAG, "Decipher signatures");
+            Log.e(TAG, "Decipher signatures: " + encSignatures.size()+ ", videos: " + ytFiles.size());
             String signature;
             decipheredSignature = null;
             if (decipherSignature(encSignatures)) {
@@ -415,13 +437,14 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
         }
 
         if (ytFiles.size() == 0) {
+            Log.e(TAG, streamMap);
             return null;
         }
         return ytFiles;
     }
 
     private boolean decipherSignature(final SparseArray<String> encSignatures) throws IOException {
-        Log.e(TAG, "decipherSignature()......");
+        Log.e(TAG,"decipherSignature()......");
         // Assume the functions don't change that much
         if (decipherFunctionName == null || decipherFunctions == null) {
             String decipherFunctUrl = "https://s.ytimg.com/yts/jsbin/" + decipherJsFileName;
@@ -538,8 +561,9 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
     }
 
     private void parseDashManifest(String dashMpdUrl, SparseArray<YtFile> ytFiles) throws IOException {
-        Log.e(TAG, "parseDashManifest()......");
-        Pattern patBaseUrl = Pattern.compile("<BaseURL yt:contentLength=\"[0-9]+?\">(.+?)</BaseURL>");
+        Log.e(TAG,"parseDashManifest()......");
+        Pattern patBaseUrl = Pattern.compile("<\\s*BaseURL(.*?)>(.+?)<\\s*/BaseURL\\s*>");
+        Pattern patDashItag = Pattern.compile("itag/([0-9]+?)/");
         String dashManifest;
         BufferedReader reader = null;
         URL getUrl = new URL(dashMpdUrl);
@@ -560,8 +584,8 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
         Matcher mat = patBaseUrl.matcher(dashManifest);
         while (mat.find()) {
             int itag;
-            String url = mat.group(1);
-            Matcher mat2 = patItag.matcher(url);
+            String url = mat.group(2);
+            Matcher mat2 = patDashItag.matcher(url);
             if (mat2.find()) {
                 itag = Integer.parseInt(mat2.group(1));
                 if (FORMAT_MAP.get(itag) == null)
@@ -571,17 +595,13 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
             } else {
                 continue;
             }
-            url = url.replace("&amp;", "&").replace(",", "%2C").
-                    replace("mime=audio/", "mime=audio%2F").
-                    replace("mime=video/", "mime=video%2F");
             YtFile yf = new YtFile(FORMAT_MAP.get(itag), url);
             ytFiles.append(itag, yf);
         }
-
     }
 
     private void parseVideoMeta(String getVideoInfo) throws UnsupportedEncodingException {
-        Log.e(TAG, "parseVideoMeta()......");
+        Log.e(TAG,"parseVideoMeta()......");
         boolean isLiveStream = false;
         String title = null, author = null, channelId = null;
         long viewCount = 0, length = 0;
@@ -615,26 +635,24 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
     }
 
     private void readDecipherFunctFromCache() {
-        Log.e(TAG, "readDecipherFunctFromCache()......");
-        if (context != null) {
-            File cacheFile = new File(context.getCacheDir().getAbsolutePath() + "/" + CACHE_FILE_NAME);
-            // The cached functions are valid for 2 weeks
-            if (cacheFile.exists() && (System.currentTimeMillis() - cacheFile.lastModified()) < 1209600000) {
-                BufferedReader reader = null;
-                try {
-                    reader = new BufferedReader(new InputStreamReader(new FileInputStream(cacheFile), "UTF-8"));
-                    decipherJsFileName = reader.readLine();
-                    decipherFunctionName = reader.readLine();
-                    decipherFunctions = reader.readLine();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    if (reader != null) {
-                        try {
-                            reader.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+        Log.e(TAG,"readDecipherFunctFromCache()......");
+        File cacheFile = new File(cacheDirPath + "/" + CACHE_FILE_NAME);
+        // The cached functions are valid for 2 weeks
+        if (cacheFile.exists() && (System.currentTimeMillis() - cacheFile.lastModified()) < 1209600000) {
+            BufferedReader reader = null;
+            try {
+                reader = new BufferedReader(new InputStreamReader(new FileInputStream(cacheFile), "UTF-8"));
+                decipherJsFileName = reader.readLine();
+                decipherFunctionName = reader.readLine();
+                decipherFunctions = reader.readLine();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -669,24 +687,22 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
     }
 
     private void writeDeciperFunctToChache() {
-        Log.e(TAG, "writeDeciperFunctToChache()......");
-        if (context != null) {
-            File cacheFile = new File(context.getCacheDir().getAbsolutePath() + "/" + CACHE_FILE_NAME);
-            BufferedWriter writer = null;
-            try {
-                writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(cacheFile), "UTF-8"));
-                writer.write(decipherJsFileName + "\n");
-                writer.write(decipherFunctionName + "\n");
-                writer.write(decipherFunctions);
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                if (writer != null) {
-                    try {
-                        writer.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+        Log.e(TAG,"writeDeciperFunctToChache()......");
+        File cacheFile = new File(cacheDirPath + "/" + CACHE_FILE_NAME);
+        BufferedWriter writer = null;
+        try {
+            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(cacheFile), "UTF-8"));
+            writer.write(decipherJsFileName + "\n");
+            writer.write(decipherFunctionName + "\n");
+            writer.write(decipherFunctions);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -694,9 +710,8 @@ public abstract class YouTubeExtractor extends AsyncTask<String, Void, SparseArr
 
     private void decipherViaWebView(final SparseArray<String> encSignatures) {
         Log.e(TAG,"decipherViaWebView()......");
-        if (context == null) {
-            return;
-        }
+        final Context context = refContext.get();
+        if (context == null) return;
 
         final StringBuilder stb = new StringBuilder(decipherFunctions + " function decipher(");
         stb.append("){return ");
