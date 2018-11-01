@@ -15,6 +15,8 @@ public class Constant {
     public static final String NAME_VALUE_SEPARATOR = "=";
     public static final String GDATA = "http://gdata.youtube.com/feeds/api/videos/%s?v=2";
     public static final String WATCHV = "http://www.youtube.com/watch?v=%s";
+    public static final String WATCHV_HTTPS = "https://www.youtube.com/watch?v=%s";
+    public static final String DECIPHER_URL = "https://s.ytimg.com/yts/jsbin/%s";
     public static final String YOUTUBE_URL = "http://www.youtube.com/get_video_info?video_id=%s&asv=3&el=detailpage&hl=en_US";
     public static final String PLAYLIST = "http://www.youtube.com/list_ajax?style=json&action_get_list=1&list=%s";
     public static final String SUB_TITLE_LIST = "http://video.google.com/timedtext?type=list&v=%s";
@@ -43,6 +45,7 @@ public class Constant {
         public static final int SDMC                                           = 0x603;
         public static final int FACEBOOK                                       = 0x604;
         public static final int YOUTUBE_CHECK                                 = 0x605;
+        public static final int M3U8                                             = 0x606;
     }
 
     public static class Msg {

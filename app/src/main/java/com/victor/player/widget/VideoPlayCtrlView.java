@@ -7,6 +7,7 @@ import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
@@ -21,7 +22,12 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.victor.http.util.MainHandler;
 import com.victor.player.R;
+import com.victor.player.library.data.FacebookReq;
+import com.victor.player.library.data.VimeoReq;
+import com.victor.player.library.data.YoutubeReq;
+import com.victor.player.library.interfaces.OnExtractListener;
 import com.victor.player.library.module.Player;
 import com.victor.player.library.util.DateUtil;
 import com.victor.player.library.util.DensityUtil;
@@ -36,7 +42,7 @@ import com.victor.player.util.Constant;
  */
 
 public class VideoPlayCtrlView extends RelativeLayout implements SeekBar.OnSeekBarChangeListener,
-        View.OnClickListener, View.OnTouchListener {
+        View.OnClickListener, View.OnTouchListener,OnExtractListener {
     private String TAG = "PlayCtrlView";
     private TextView mTvPassTime,mTvLongTime,mTvMediaFastForward;
     private SeekBar mSbPlayProgress;
@@ -472,7 +478,7 @@ public class VideoPlayCtrlView extends RelativeLayout implements SeekBar.OnSeekB
             Loger.e(TAG,"playUrl is empty");
             return;
         }
-        mPlayCtrl.play(playUrl);
+        mPlayCtrl.play(playUrl,this);
     }
 
     public void pause () {
@@ -509,4 +515,33 @@ public class VideoPlayCtrlView extends RelativeLayout implements SeekBar.OnSeekB
         mTvPlayName.setText(title);
     }
 
+    @Override
+    public void OnYoutube(final YoutubeReq youtubeReq) {
+        MainHandler.runMainThread(new Runnable() {
+            @Override
+            public void run() {
+                if (youtubeReq != null) {
+                    mTvPlayName.setText(youtubeReq.title);
+                }
+            }
+        });
+
+    }
+
+    @Override
+    public void OnVimeo(final VimeoReq vimeoReq) {
+        MainHandler.runMainThread(new Runnable() {
+            @Override
+            public void run() {
+                if (vimeoReq != null) {
+                    mTvPlayName.setText(vimeoReq.title);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void OnFacebook(FacebookReq facebookReq) {
+
+    }
 }

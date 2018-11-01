@@ -20,7 +20,7 @@ public class Format {
     private boolean isDashContainer;
     private boolean isHlsContent;
 
-    Format(int itag, String ext, int height, VCodec vCodec, ACodec aCodec, boolean isDashContainer) {
+    public Format(int itag, String ext, int height, VCodec vCodec, ACodec aCodec, boolean isDashContainer) {
         this.itag = itag;
         this.ext = ext;
         this.height = height;
@@ -30,7 +30,7 @@ public class Format {
         this.isHlsContent = false;
     }
 
-    Format(int itag, String ext, VCodec vCodec, ACodec aCodec, int audioBitrate, boolean isDashContainer) {
+    public Format(int itag, String ext, VCodec vCodec, ACodec aCodec, int audioBitrate, boolean isDashContainer) {
         this.itag = itag;
         this.ext = ext;
         this.height = -1;
@@ -40,7 +40,7 @@ public class Format {
         this.isHlsContent = false;
     }
 
-    Format(int itag, String ext, int height, VCodec vCodec, ACodec aCodec, int audioBitrate,
+    public Format(int itag, String ext, int height, VCodec vCodec, ACodec aCodec, int audioBitrate,
            boolean isDashContainer) {
         this.itag = itag;
         this.ext = ext;
@@ -51,7 +51,7 @@ public class Format {
         this.isHlsContent = false;
     }
 
-    Format(int itag, String ext, int height, VCodec vCodec, ACodec aCodec, int audioBitrate,
+    public Format(int itag, String ext, int height, VCodec vCodec, ACodec aCodec, int audioBitrate,
            boolean isDashContainer, boolean isHlsContent) {
         this.itag = itag;
         this.ext = ext;
@@ -62,7 +62,7 @@ public class Format {
         this.isHlsContent = isHlsContent;
     }
 
-    Format(int itag, String ext, int height, VCodec vCodec, int fps, ACodec aCodec, boolean isDashContainer) {
+    public Format(int itag, String ext, int height, VCodec vCodec, int fps, ACodec aCodec, boolean isDashContainer) {
         this.itag = itag;
         this.ext = ext;
         this.height = height;

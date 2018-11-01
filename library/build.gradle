@@ -41,10 +41,13 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
-    implementation 'com.github.Victor2018:HttpLib:v2.7'
+    implementation 'com.github.Victor2018:HttpProLib:v1.3'
     compile 'com.github.Victor2018:ScreenMatchLib:v1.0'
-    implementation files('libs/jsoup-1.11.3.jar')
     implementation files('libs/dom4j-1.6.1.jar')
+
+    implementation 'com.mcxiaoke.volley:library:1.0.19'
+    implementation 'com.squareup.okhttp3:okhttp:3.5.0'
+    implementation 'com.alibaba:fastjson:1.1.56.android'
 }
 
 def SDK_BASENAME = "LongPlayer";

@@ -4,16 +4,20 @@ public class VideoMeta {
 
     private static final String IMAGE_BASE_URL = "http://i.ytimg.com/vi/";
 
-    private String videoId;
-    private String title;
+    public String videoId;
+    public String title;
 
-    private String author;
-    private String channelId;
+    public String author;
+    public String channelId;
 
-    private long videoLength;
-    private long viewCount;
+    public long videoLength;
+    public long viewCount;
 
-    private boolean isLiveStream;
+    public boolean isLiveStream;
+
+    public VideoMeta (){
+
+    }
 
     protected VideoMeta(String videoId, String title, String author, String channelId, long videoLength, long viewCount, boolean isLiveStream) {
         this.videoId = videoId;

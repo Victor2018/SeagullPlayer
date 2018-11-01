@@ -6,6 +6,7 @@ public class YoutubeReq {
     public boolean have_basic;
     public boolean have_gdata;
     public String description;
+    public String channelId;
     public String category;
     public String hlsvp;//直播m3u8播放地址（为空则是点播）
     public String published;

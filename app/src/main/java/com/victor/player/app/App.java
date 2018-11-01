@@ -2,8 +2,6 @@ package com.victor.player.app;
 
 import android.app.Application;
 
-import com.victor.http.module.VolleyRequest;
-
 /**
  * Created by victor on 2017/9/12 0012.
  */
@@ -23,7 +21,7 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         //初始化
-        VolleyRequest.buildRequestQueue(this);
+//        VolleyRequest.buildRequestQueue(this);
     }
 
 }

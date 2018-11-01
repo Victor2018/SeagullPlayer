@@ -13,6 +13,10 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import com.victor.player.R;
+import com.victor.player.library.data.FacebookReq;
+import com.victor.player.library.data.VimeoReq;
+import com.victor.player.library.data.YoutubeReq;
+import com.victor.player.library.interfaces.OnExtractListener;
 import com.victor.player.library.module.PlayHelper;
 import com.victor.player.library.util.Loger;
 import com.victor.player.library.util.ScreenOrientationUtil;
@@ -229,7 +233,7 @@ public class PlayCtrl {
         }
     }
 
-    public void play (String playUrl) {
+    public void play (String playUrl, OnExtractListener listener) {
         if (mPlayHelper == null || mPlayHelper.getPlayer() == null) {
             Loger.e(TAG,"mPlayer == null please init player first");
             return;
@@ -238,7 +242,7 @@ public class PlayCtrl {
             Loger.e(TAG,"playUrl is empty");
             return;
         }
-        mPlayHelper.play(playUrl);
+        mPlayHelper.play(playUrl,listener);
     }
 
    /* public void playByYoutubeView () {
@@ -322,5 +326,4 @@ public class PlayCtrl {
     public String getLastPlayContentId () {
         return lastPlayContentId;
     }
-
 }
