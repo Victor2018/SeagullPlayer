@@ -42,7 +42,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
     implementation 'com.github.Victor2018:HttpProLib:v1.3'
-    compile 'com.github.Victor2018:ScreenMatchLib:v1.0'
+    implementation 'com.github.Victor2018:ScreenMatchLib:v1.0'
     implementation files('libs/dom4j-1.6.1.jar')
 
     implementation 'com.mcxiaoke.volley:library:1.0.19'
@@ -50,7 +50,7 @@ dependencies {
     implementation 'com.alibaba:fastjson:1.1.56.android'
 }
 
-def SDK_BASENAME = "LongPlayer";
+def SDK_BASENAME = "SeagullPlayer";
 def SDK_VERSION = "_v1.0";
 def sdkDestinationPath = "libs";
 def zipFile = file('build/intermediates/bundles/release/classes.jar')

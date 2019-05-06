@@ -165,12 +165,13 @@ public class YoutubeParserHelper implements OnHttpListener,SubTitleListView<Stri
     public void onComplete(int videoType, Object data, String msg) {
         switch (videoType) {
             case REQUEST_YOUTUBE_INFO:
+                Log.e(TAG,"onComplete()-REQUEST_YOUTUBE_INFO");
                 if (data != null) {
                     youtubeReq = YoutubeParser.parseYoutubeData(data.toString());
                 }
                 boolean sigEnc = YoutubeParser.parseYoutubeSigEnc(data.toString());
+                Log.e(TAG,"onComplete()-REQUEST_YOUTUBE_INFO---sigEnc = " + sigEnc);
                 if (sigEnc) {
-                    Log.e(TAG, "onComplete-REQUEST_YOUTUBE_INFO-youtubeUrl = " + youtubeUrl);
                     sendRequestWithParms(REQUEST_YOUTUBE_HTML, youtubeUrl);
                 } else {
                     if (mOnYoutubeListener != null) {
@@ -179,14 +180,20 @@ public class YoutubeParserHelper implements OnHttpListener,SubTitleListView<Stri
                 }
                 break;
             case REQUEST_YOUTUBE_HTML:
+                Log.e(TAG,"onComplete()-REQUEST_YOUTUBE_HTML");
                 YoutubeHtmlData youtubeHtmlData = YoutubeParser.parseYoutubeHtml(data.toString());
                 if (youtubeHtmlData != null) {
                     ytFiles = youtubeHtmlData.ytFiles;
                     decipherViaParm.encSignatures = youtubeHtmlData.encSignatures;
                     sendRequestWithParms(REQUEST_YOUTUBE_DECIPHER,youtubeHtmlData.decipherJsFileName);
+                } else {
+                    if (mOnYoutubeListener != null) {
+                        mOnYoutubeListener.OnYoutube(youtubeReq,"youtubeHtmlData == null");
+                    }
                 }
                 break;
             case REQUEST_YOUTUBE_DECIPHER:
+                Log.e(TAG,"onComplete()-REQUEST_YOUTUBE_DECIPHER");
                 DecipherData decipherData = YoutubeParser.parseYoutubeDecipher(data.toString());
                 if (decipherData != null) {
                     decipherViaParm.decipherFunctionName = decipherData.decipherFunctionName;
@@ -194,9 +201,14 @@ public class YoutubeParserHelper implements OnHttpListener,SubTitleListView<Stri
                     Log.e(TAG,"onComplete-decipherData.decipherFunctionName = " + decipherData.decipherFunctionName);
                     Log.e(TAG,"onComplete-decipherData.decipherFunctions = " + decipherData.decipherFunctions);
                     sendRequestWithParms(REQUEST_YOUTUBE_DECIPHER_VIA,decipherViaParm);
+                } else {
+                    if (mOnYoutubeListener != null) {
+                        mOnYoutubeListener.OnYoutube(null,"decipherData == null");
+                    }
                 }
                 break;
             case REQUEST_YOUTUBE_DECIPHER_VIA:
+                Log.e(TAG,"onComplete()-REQUEST_YOUTUBE_DECIPHER_VIA");
                 String signature = data.toString();
                 Log.e(TAG,"onComplete-jsResult = " + signature);
                 if (!TextUtils.isEmpty(signature)) {
@@ -211,7 +223,8 @@ public class YoutubeParserHelper implements OnHttpListener,SubTitleListView<Stri
                             if (ytFiles != null && ytFiles.size() > 0) {
                                 String url = ytFiles.get(key).getUrl();
                                 url += "&signature=" + sigs[i];
-                                Log.e(TAG,"getStreamUrls()......url = " + key + "------>" +url);
+//                                Log.e(TAG,"getStreamUrls()......url = " + key + "------>" +url);
+                                Log.e(TAG,"getStreamUrls()......youtubeReq = " + youtubeReq);
                                 if (youtubeReq != null) {
                                     if (youtubeReq.sm != null && youtubeReq.sm.size() > 0) {
                                         if (i < youtubeReq.sm.size()) {
@@ -229,7 +242,17 @@ public class YoutubeParserHelper implements OnHttpListener,SubTitleListView<Stri
                     }
                     if (youtubeReq != null) {
                         youtubeReq.sm = urls;
-                        mOnYoutubeListener.OnYoutube(youtubeReq,"youtube no data response!");
+                        if (mOnYoutubeListener != null) {
+                            mOnYoutubeListener.OnYoutube(youtubeReq,"start play youtube...");
+                        }
+                    } else {
+                        if (mOnYoutubeListener != null) {
+                            mOnYoutubeListener.OnYoutube(youtubeReq,"youtube no data response!");
+                        }
+                    }
+                } else {
+                    if (mOnYoutubeListener != null) {
+                        mOnYoutubeListener.OnYoutube(youtubeReq,"signature == null");
                     }
                 }
                 break;

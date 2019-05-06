@@ -242,6 +242,7 @@ public class PlayHelper implements VimeoView<VimeoReq>,FacebookView<FacebookReq>
 
     @Override
     public void OnYoutube(YoutubeReq youtubeReq, String msg) {
+        Log.e(TAG,"OnYoutube()......");
         this.youtubeReq = youtubeReq;
         if (mOnExtractListener != null) {
             mOnExtractListener.OnYoutube(youtubeReq);

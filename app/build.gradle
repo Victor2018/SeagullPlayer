@@ -63,6 +63,6 @@ dependencies {
 
     implementation 'com.github.Victor2018:HttpProLib:v1.3'
 
-    compile project(':library')
+    implementation project(':library')
 
 }

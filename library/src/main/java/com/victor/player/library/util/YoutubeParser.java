@@ -3,6 +3,7 @@ package com.victor.player.library.util;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
+import android.widget.TextView;
 
 import com.victor.player.library.data.DecipherData;
 import com.victor.player.library.data.FmtStreamMap;
@@ -12,11 +13,17 @@ import com.victor.player.library.ytparser.Format;
 import com.victor.player.library.ytparser.VideoMeta;
 import com.victor.player.library.ytparser.YtFile;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Observer;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -242,16 +249,30 @@ public class YoutubeParser {
                 data.channelId = mat.group(1);
             }
             data.hlsvp = videoInfoMap.get("hlsvp");
+
+            if (TextUtils.isEmpty(data.hlsvp)) {
+                if (videoInfoMap.containsKey("player_response")) {
+                    data.hlsvp = parseLiveData(videoInfoMap.get("player_response"));
+                }
+            }
+
             data.author = videoInfoMap.get("author");
             data.videoid = videoInfoMap.get("video_id");
             data.rating = videoInfoMap.get("avg_rating");
-            data.length = Long.parseLong(videoInfoMap.get("length_seconds"));
-            data.viewcount = Integer.parseInt(videoInfoMap.get("view_count"));
-            try {
-                data.thumb = URLDecoder.decode(videoInfoMap.get("thumbnail_url"), "utf-8");
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+            if (videoInfoMap.containsKey("length_seconds")) {
+                String lengthSec = videoInfoMap.get("length_seconds");
+                if (!TextUtils.isEmpty(lengthSec)) {
+                    data.length = Long.parseLong(lengthSec);
+                }
             }
+            if (videoInfoMap.containsKey("view_count")) {
+                String viewCount = videoInfoMap.get("view_count");
+                if (!TextUtils.isEmpty(viewCount)) {
+                    data.viewcount = Integer.parseInt(viewCount);
+                }
+            }
+
+            data.thumb = URLDecoder.decode(videoInfoMap.get("thumbnail_url"), "utf-8");
             // duration=//TODO:时长
             // TODO:解析视频格式,这货后面几个值是个啥
             // fmt_list=
@@ -281,6 +302,32 @@ public class YoutubeParser {
         }
 
         return data;
+    }
+
+    /**
+     * 解析直播m3u8播放地址
+     * @param liveReponse
+     * @return
+     */
+    private static String parseLiveData (String liveReponse) {
+        Log.e(TAG,"parseLiveData()......");
+        String liveUrl = "";
+        if (!TextUtils.isEmpty(liveReponse)) {
+            try {
+                JSONObject object = new JSONObject(liveReponse);
+
+                if (object != null) {
+                    JSONObject playabilityStatus = object.getJSONObject("streamingData");
+                    if (playabilityStatus != null) {
+                        liveUrl = playabilityStatus.optString("hlsManifestUrl");
+                        Log.e(TAG,"parseLiveData()......liveUrl= " + liveUrl);
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return liveUrl;
     }
 
     public static HashMap<String, String> getVideoInfoMap(final Scanner scanner, final String encoding) {
@@ -362,6 +409,9 @@ public class YoutubeParser {
                         FmtStreamMap streamMap = YoutubeParser.parseFmtStreamMap(new Scanner(s), "utf-8");
                         streamMaps.add(streamMap);
                     }
+                } else {
+                    FmtStreamMap streamMap = YoutubeParser.parseFmtStreamMap(new Scanner(uefms2), "utf-8");
+                    streamMaps.add(streamMap);
                 }
             }
         }
@@ -483,4 +533,5 @@ public class YoutubeParser {
         FORMAT_MAP.put(95, new Format(95, "mp4", 720 ,Format.VCodec.H264, Format.ACodec.AAC, 256, false, true));
         FORMAT_MAP.put(96, new Format(96, "mp4", 1080 ,Format.VCodec.H264, Format.ACodec.AAC, 256, false, true));
     }
+
 }
