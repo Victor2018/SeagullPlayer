@@ -1,5 +1,9 @@
 # SeagullPlayer
-# Ò»¿î¿ÉÒÔ²¥·ÅFacebook£¬vimeo£¬youtubeÊÓÆµµÄ²¥·ÅÆ÷
+# ä¸€æ¬¾å¯ä»¥æ’­æ”¾Facebookï¼Œvimeoï¼Œyoutubeè§†é¢‘çš„æ’­æ”¾å™¨
+
+# æ•ˆæœå›¾
+
+- ![image](https://github.com/Victor2018/SeagullPlayer/raw/master/SrceenShot/gif_player.gif)
 
 Usage
 
@@ -18,10 +22,10 @@ dependencies {
 }
 
 
-# ¹Ø×¢¿ª·¢Õß£º
-- ÓÊÏä£º victor423099@gmail.com
-- ĞÂÀËÎ¢²©
-- ![image](https://github.com/Victor2018/AppUpdateLib/raw/master/SrceenShot/sina_weibo.jpg)
+# å…³æ³¨å¼€å‘è€…ï¼š
+- é‚®ç®±ï¼š victor423099@gmail.com
+- æ–°æµªå¾®åš
+- ![image](https://github.com/Victor2018/SeagullPlayer/raw/master/SrceenShot/sina_weibo.jpg)
 
 ## License
 
